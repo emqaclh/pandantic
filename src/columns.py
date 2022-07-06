@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Union, Tuple
 from numpy import diag
 
 import pandas as pd
@@ -13,7 +13,7 @@ class ObjectColumn:
         self.check_nulls = check_nulls
         self.check_unique = check_unique
 
-    def _coerce(self, series: pd.Series) -> pd.Series:
+    def coerce(self, series: pd.Series) -> pd.Series:
         return series
 
     def evaluate(self, series: pd.Series) -> Dict:
@@ -23,29 +23,29 @@ class ObjectColumn:
 
         diagnostic = dict(coerced=False)
 
-        valid_dtype = self.evaluate_dtype(series)
+        valid_dtype = self._evaluate_dtype(series)
         if not valid_dtype:
-            series = self._coerce(series)
-            diagnostic['coerced'] = True
+            series = self.coerce(series)
+            diagnostic["coerced"] = True
+            valid_dtype = self._evaluate_dtype(series)
 
-        valid_dtype = self.evaluate_dtype(series)
         if not valid_dtype:
-            diagnostic['valid_dtype'] = False
+            diagnostic["valid_dtype"] = False
 
         if not self.check_nulls:
-            nulls = self.evaluate_nulls(series)
+            nulls = self._evaluate_nulls(series)
             diagnostic["nulls"] = nulls
 
         if self.check_unique:
-            uniqueness = self.evaluate_uniqueness(series)
+            uniqueness = self._evaluate_uniqueness(series)
             diagnostic["uniqueness"] = uniqueness
 
         return series, diagnostic
 
-    def evaluate_dtype(series: pd.Series) -> bool:
+    def _evaluate_dtype(series: pd.Series) -> Union[Tuple[int, bool], bool]:
         return True
 
-    def evaluate_nulls(self, series: pd.Series, return_count=False) -> bool:
+    def _evaluate_nulls(self, series: pd.Series, return_count=False) -> bool:
         nulls_count = series.isnull().sum()
 
         if return_count:
@@ -53,7 +53,7 @@ class ObjectColumn:
 
         return nulls_count == 0
 
-    def evaluate_uniqueness(self, series: pd.Series) -> bool:
+    def _evaluate_uniqueness(self, series: pd.Series) -> bool:
         return series.is_unique
 
 
