@@ -16,12 +16,17 @@ class ObjectColumn:
     def coerce(self, series: pd.Series) -> pd.Series:
         return series
 
-    def evaluate(self, series: pd.Series) -> Dict:
+    def evaluate(self, series: pd.Series) -> Tuple[pd.Series, Dict]:
+        series, diagnostic = self._evaluate(series)
+        diagnostic = self._check_for_warns(series, diagnostic)
+        return series, diagnostic
+
+    def _evaluate(self, series: pd.Series) -> Tuple[pd.Series, Dict]:
 
         if type(series) is not pd.Series:
             raise TypeError("A pandas.Series object must be provided")
 
-        diagnostic = dict(coerced=False, warnings=[])
+        diagnostic = dict(coerced=False)
 
         valid_dtype = self.evaluate_dtype(series)
         if not valid_dtype:
@@ -41,6 +46,10 @@ class ObjectColumn:
             diagnostic["unique"] = uniqueness
 
         return series, diagnostic
+    
+    def _check_for_warns(self, series: pd.Series, diagnostic: Dict) -> Dict:
+        diagnostic['warnings'] = []
+        return diagnostic
 
     def evaluate_dtype(self, series: pd.Series) -> bool:
         return True
@@ -74,10 +83,13 @@ class IntColumn(NumberColumn):
     def evaluate_dtype(self, series: pd.Series) -> bool:
         return np.issubdtype(series.dtype, np.int_)
 
-    def evaluate(self, series: pd.Series) -> Dict:
-        series, diagnostic =  super().evaluate(series)
-        diagnostic['warnings'].append('Null values on integer columns are not supported yet.')
-        return series, diagnostic
+    def _check_for_warns(self, series: pd.Series, diagnostic: Dict) -> Dict:
+        diagnostic = super()._check_for_warns(series, diagnostic)
+        
+        if diagnostic['nulls']:
+            diagnostic['warnings'].append('Null values on integer columns are not supported yet.')
+
+        return diagnostic
 
 
 class FloatColumn(NumberColumn):
@@ -100,6 +112,9 @@ class StringColumn(ObjectColumn):
 
     def evaluate_dtype(self, series: pd.Series) -> bool:
         return 'string' == series.dtype(str)
+
+class BoolColumns(ObjectColumn):
+    pass
 
 
 class CategoryColumn(ObjectColumn):
