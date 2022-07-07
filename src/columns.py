@@ -6,10 +6,10 @@ import pandas as pd
 
 class ObjectColumn:
 
-    check_nulls = True
+    check_nulls = False
     check_unique = False
 
-    def __init__(self, check_nulls=True, check_unique=False) -> None:
+    def __init__(self, check_nulls=False, check_unique=False) -> None:
         self.check_nulls = check_nulls
         self.check_unique = check_unique
 
@@ -32,26 +32,26 @@ class ObjectColumn:
         if not valid_dtype:
             diagnostic["valid_dtype"] = False
 
-        if not self.check_nulls:
+        if self.check_nulls:
             nulls = self._evaluate_nulls(series)
             diagnostic["nulls"] = nulls
 
         if self.check_unique:
             uniqueness = self._evaluate_uniqueness(series)
-            diagnostic["uniqueness"] = uniqueness
+            diagnostic["unique"] = uniqueness
 
         return series, diagnostic
 
-    def _evaluate_dtype(series: pd.Series) -> Union[Tuple[int, bool], bool]:
+    def _evaluate_dtype(self, series: pd.Series) -> Union[Tuple[int, bool], bool]:
         return True
 
     def _evaluate_nulls(self, series: pd.Series, return_count=False) -> bool:
         nulls_count = series.isnull().sum()
 
         if return_count:
-            return nulls_count == 0, nulls_count
+            return nulls_count > 0, nulls_count
 
-        return nulls_count == 0
+        return nulls_count > 0
 
     def _evaluate_uniqueness(self, series: pd.Series) -> bool:
         return series.is_unique
