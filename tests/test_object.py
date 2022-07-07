@@ -5,6 +5,7 @@ import numpy as np
 
 from src import columns
 
+
 def test_object_column_default_values():
 
     col = pd.Series([0, 0, 0])
@@ -13,9 +14,10 @@ def test_object_column_default_values():
 
     fixed_col, diagnostic = col_definition.evaluate(col)
 
-    assert 'nulls' not in diagnostic
-    assert 'unique' not in diagnostic
-    assert diagnostic['coerced'] == False
+    assert "nulls" not in diagnostic
+    assert "unique" not in diagnostic
+    assert diagnostic["coerced"] == False
+
 
 def test_object_column_uniqueness():
 
@@ -25,8 +27,9 @@ def test_object_column_uniqueness():
 
     fixed_col, diagnostic = col_definition.evaluate(col)
 
-    assert 'unique' in diagnostic
-    assert diagnostic['unique'] == True
+    assert "unique" in diagnostic
+    assert diagnostic["unique"] == True
+
 
 def test_object_column_nulls():
 
@@ -36,5 +39,5 @@ def test_object_column_nulls():
 
     fixed_col, diagnostic = col_definition.evaluate(col)
 
-    assert 'nulls' in diagnostic
-    assert diagnostic['nulls'] == True
+    assert "nulls" in diagnostic
+    assert diagnostic["nulls"] == True

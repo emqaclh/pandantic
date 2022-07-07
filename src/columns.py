@@ -1,7 +1,7 @@
 from typing import Dict, Union, Tuple
-from numpy import diag
 
 import pandas as pd
+import numpy as np
 
 
 class ObjectColumn:
@@ -21,13 +21,13 @@ class ObjectColumn:
         if type(series) is not pd.Series:
             raise TypeError("A pandas.Series object must be provided")
 
-        diagnostic = dict(coerced=False)
+        diagnostic = dict(coerced=False, warnings=[])
 
-        valid_dtype = self._evaluate_dtype(series)
+        valid_dtype = self.evaluate_dtype(series)
         if not valid_dtype:
             series = self.coerce(series)
             diagnostic["coerced"] = True
-            valid_dtype = self._evaluate_dtype(series)
+            valid_dtype = self.evaluate_dtype(series)
 
         if not valid_dtype:
             diagnostic["valid_dtype"] = False
@@ -42,7 +42,7 @@ class ObjectColumn:
 
         return series, diagnostic
 
-    def _evaluate_dtype(self, series: pd.Series) -> Union[Tuple[int, bool], bool]:
+    def evaluate_dtype(self, series: pd.Series) -> bool:
         return True
 
     def _evaluate_nulls(self, series: pd.Series, return_count=False) -> bool:
@@ -58,19 +58,48 @@ class ObjectColumn:
 
 
 class NumberColumn(ObjectColumn):
-    pass
+    def coerce(self, series: pd.Series) -> pd.Series:
+        return pd.to_numeric(series, errors='ignore')
+
+    def evaluate_dtype(self, series: pd.Series) -> bool:
+        return np.issubdtype(series.dtype, np.number)
 
 
 class IntColumn(NumberColumn):
-    pass
+
+    def coerce(self, series: pd.Series) -> pd.Series:
+        coerced = super().coerce(series)
+        return coerced.astype(int)
+    
+    def evaluate_dtype(self, series: pd.Series) -> bool:
+        return np.issubdtype(series.dtype, np.int_)
+
+    def evaluate(self, series: pd.Series) -> Dict:
+        series, diagnostic =  super().evaluate(series)
+        diagnostic['warnings'].append('Null values on integer columns are not supported yet.')
+        return series, diagnostic
 
 
 class FloatColumn(NumberColumn):
-    pass
+
+    def coerce(self, series: pd.Series) -> pd.Series:
+        coerced = super().coerce(series)
+        return coerced.astype(float)
+    
+    def evaluate_dtype(self, series: pd.Series) -> bool:
+        correct_dtype = []
+        for prec in ('16', '32', '64'):
+            correct_dtype.append(np.issubdtype(series.dtype, f'float{prec}'))
+        return any(correct_dtype)
 
 
 class StringColumn(ObjectColumn):
-    pass
+    
+    def coerce(self, series: pd.Series) -> pd.Series:
+        return series.astype(pd.StringDtype())
+
+    def evaluate_dtype(self, series: pd.Series) -> bool:
+        return 'string' == series.dtype(str)
 
 
 class CategoryColumn(ObjectColumn):

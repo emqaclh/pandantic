@@ -132,4 +132,4 @@ dmypy.json
 .vscode
 
 # ipy notebooks
-.notebooks
+notebooks
