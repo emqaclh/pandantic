@@ -1,4 +1,4 @@
-from typing import Dict, Union, Tuple
+from typing import Dict, Tuple, Optional
 
 import pandas as pd
 import numpy as np
@@ -13,7 +13,7 @@ class ObjectColumn:
         self.check_nulls = check_nulls
         self.check_unique = check_unique
 
-    def coerce(self, series: pd.Series) -> pd.Series:
+    def cast(self, series: pd.Series) -> pd.Series:
         return series
 
     def evaluate(self, series: pd.Series) -> Tuple[pd.Series, Dict]:
@@ -23,15 +23,15 @@ class ObjectColumn:
 
     def _evaluate(self, series: pd.Series) -> Tuple[pd.Series, Dict]:
 
-        if type(series) is not pd.Series:
+        if not isinstance(series, pd.Series):
             raise TypeError("A pandas.Series object must be provided")
 
-        diagnostic = dict(coerced=False)
+        diagnostic = dict(casted=False)
 
         valid_dtype = self.evaluate_dtype(series)
         if not valid_dtype:
-            series = self.coerce(series)
-            diagnostic["coerced"] = True
+            series = self.cast(series)
+            diagnostic["casted"] = True
             valid_dtype = self.evaluate_dtype(series)
 
         if not valid_dtype:
@@ -46,9 +46,9 @@ class ObjectColumn:
             diagnostic["unique"] = uniqueness
 
         return series, diagnostic
-    
+
     def _check_for_warns(self, series: pd.Series, diagnostic: Dict) -> Dict:
-        diagnostic['warnings'] = []
+        diagnostic["warnings"] = []
         return diagnostic
 
     def evaluate_dtype(self, series: pd.Series) -> bool:
@@ -67,63 +67,100 @@ class ObjectColumn:
 
 
 class NumberColumn(ObjectColumn):
-    def coerce(self, series: pd.Series) -> pd.Series:
-        return pd.to_numeric(series, errors='ignore')
+    def cast(self, series: pd.Series) -> pd.Series:
+        return pd.to_numeric(series, errors="ignore")
 
     def evaluate_dtype(self, series: pd.Series) -> bool:
-        return np.issubdtype(series.dtype, np.number)
+        try:
+            return np.issubdtype(series.dtype, np.number)
+        except TypeError:
+            return False
 
 
 class IntColumn(NumberColumn):
+    def cast(self, series: pd.Series) -> pd.Series:
+        try:
+            coerced = super().cast(series)
+            return coerced.astype(int)
+        except ValueError:
+            return series
 
-    def coerce(self, series: pd.Series) -> pd.Series:
-        coerced = super().coerce(series)
-        return coerced.astype(int)
-    
     def evaluate_dtype(self, series: pd.Series) -> bool:
-        return np.issubdtype(series.dtype, np.int_)
+        try:
+            return np.issubdtype(series.dtype, np.int_)
+        except TypeError:
+            return False
 
     def _check_for_warns(self, series: pd.Series, diagnostic: Dict) -> Dict:
         diagnostic = super()._check_for_warns(series, diagnostic)
-        
-        if diagnostic['nulls']:
-            diagnostic['warnings'].append('Null values on integer columns are not supported yet.')
+
+        if diagnostic["nulls"]:
+            diagnostic["warnings"].append(
+                "Null values on integer columns are not supported yet."
+            )
 
         return diagnostic
 
 
 class FloatColumn(NumberColumn):
+    def cast(self, series: pd.Series) -> pd.Series:
+        try:
+            coerced = super().cast(series)
+            return coerced.astype(float)
+        except ValueError:
+            return series
 
-    def coerce(self, series: pd.Series) -> pd.Series:
-        coerced = super().coerce(series)
-        return coerced.astype(float)
-    
     def evaluate_dtype(self, series: pd.Series) -> bool:
-        correct_dtype = []
-        for prec in ('16', '32', '64'):
-            correct_dtype.append(np.issubdtype(series.dtype, f'float{prec}'))
-        return any(correct_dtype)
+        try:
+            correct_dtype = []
+            for prec in ("16", "32", "64"):
+                correct_dtype.append(np.issubdtype(series.dtype, f"float{prec}"))
+            return any(correct_dtype)
+        except TypeError:
+            return False
 
 
 class StringColumn(ObjectColumn):
-    
-    def coerce(self, series: pd.Series) -> pd.Series:
-        return series.astype(pd.StringDtype())
+    def cast(self, series: pd.Series) -> pd.Series:
+        try:
+            return series.astype(pd.StringDtype())
+        except ValueError:
+            return series
 
     def evaluate_dtype(self, series: pd.Series) -> bool:
-        return 'string' == series.dtype(str)
+        return str(series) == "string"
+
 
 class BoolColumns(ObjectColumn):
-    pass
+    def cast(self, series: pd.Series) -> pd.Series:
+        try:
+            return series.astype(bool)
+        except ValueError:
+            return series
+
+    def evaluate_dtype(self, series: pd.Series) -> bool:
+        return str(series) == "bool"
 
 
 class CategoryColumn(ObjectColumn):
-    pass
+    
+    def cast(self, series: pd.Series) -> pd.Series:
+        return pd.Categorical(series)
+    
+    def evaluate_dtype(self, series: pd.Series) -> bool:
+        return str(series) == "str"
 
 
 class DatetimeColumn(ObjectColumn):
-    pass
 
+    __datetime_format = None
 
-class TimedeltaColumn(ObjectColumn):
-    pass
+    def __init__(self, check_nulls=False, check_unique=False, datetime_format: Optional[str]=None) -> None:
+        super().__init__(check_nulls, check_unique)
+        self.__datetime_format = datetime_format
+    
+    def cast(self, series: pd.Series) -> pd.Series:
+        return pd.to_datetime(series, errors='ignore', format=self.__datetime_format)
+    
+    def evaluate_dtype(self, series: pd.Series) -> bool:
+        return 'datetime' in str(series.dtype)

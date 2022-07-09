@@ -28,7 +28,7 @@ def test_object_column_uniqueness():
     fixed_col, diagnostic = col_definition.evaluate(col)
 
     assert "unique" in diagnostic
-    assert diagnostic["unique"] == True
+    assert diagnostic["unique"] is True
 
 
 def test_object_column_nulls():
@@ -40,4 +40,4 @@ def test_object_column_nulls():
     fixed_col, diagnostic = col_definition.evaluate(col)
 
     assert "nulls" in diagnostic
-    assert diagnostic["nulls"] == True
+    assert diagnostic["nulls"] is True
