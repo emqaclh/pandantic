@@ -1,3 +1,6 @@
+"""
+Declares columns for main pandas datatypes.
+"""
 from typing import Dict, List, Tuple, Optional
 
 import pandas as pd
@@ -47,12 +50,15 @@ class ObjectColumn:
 
         return series, diagnostic
 
+    # pylint: disable=unused-argument
     def _pre_evaluation(self, series: pd.Series, diagnostic: Dict) -> Dict:
         return diagnostic
 
+    # pylint: disable=unused-argument
     def _post_evaluation(self, series: pd.Series, diagnostic: Dict) -> Dict:
         return diagnostic
 
+    # pylint: disable=unused-argument
     def _evaluate_dtype(self, series: pd.Series) -> bool:
         return True
 
