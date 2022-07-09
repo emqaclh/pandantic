@@ -1,3 +1,4 @@
+# pylint: disable=unused-import
 import pytest
 
 import pandas as pd
@@ -12,11 +13,11 @@ def test_object_column_default_values():
 
     col_definition = columns.ObjectColumn()
 
-    fixed_col, diagnostic = col_definition.evaluate(col)
+    _, diagnostic = col_definition.evaluate(col)
 
     assert "nulls" not in diagnostic
     assert "unique" not in diagnostic
-    assert diagnostic["coerced"] == False
+    assert diagnostic["casted"] is False
 
 
 def test_object_column_uniqueness():
@@ -25,7 +26,7 @@ def test_object_column_uniqueness():
 
     col_definition = columns.ObjectColumn(check_unique=True)
 
-    fixed_col, diagnostic = col_definition.evaluate(col)
+    _, diagnostic = col_definition.evaluate(col)
 
     assert "unique" in diagnostic
     assert diagnostic["unique"] is True
@@ -37,7 +38,7 @@ def test_object_column_nulls():
 
     col_definition = columns.ObjectColumn(check_nulls=True)
 
-    fixed_col, diagnostic = col_definition.evaluate(col)
+    _, diagnostic = col_definition.evaluate(col)
 
     assert "nulls" in diagnostic
-    assert diagnostic["nulls"] is True
+    assert diagnostic["nulls"]

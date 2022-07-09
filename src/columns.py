@@ -174,7 +174,7 @@ class CategoryColumn(ObjectColumn):
 
         if nunique_cats != nunique_vals:
             diagnostic["warnings"].append(
-                f"There is {nunique_vals} unique values on the column, but {nunique_cats} declared categories."
+                f"There are {nunique_vals} unique values on the column, but {nunique_cats} declared categories."
             )
 
         return diagnostic
