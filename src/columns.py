@@ -143,7 +143,7 @@ class StringColumn(ObjectColumn):
         return str(series.dtype) == "string"
 
 
-class BoolColumns(ObjectColumn):
+class BoolColumn(ObjectColumn):
     def _cast(self, series: pd.Series) -> pd.Series:
         try:
             return series.astype(bool)
@@ -168,7 +168,7 @@ class CategoryColumn(ObjectColumn):
         return pd.Categorical(series, categories=self.__categories)
 
     def _evaluate_dtype(self, series: pd.Series) -> bool:
-        return str(series.dtype) == "str"
+        return str(series.dtype) == "category"
 
     def _pre_evaluation(self, series: pd.Series, diagnostic: Dict) -> Dict:
         nunique_vals = series.nunique()
