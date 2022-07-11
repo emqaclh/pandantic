@@ -1,5 +1,6 @@
 """
-Declares columns for main pandas datatypes.
+Declares columns for main pandas datatypes:
+Object, Numbers (float and int), Booleans, Datetime and Categories.
 """
 from typing import Dict, List, Tuple, Optional
 
@@ -37,8 +38,7 @@ class ObjectColumn:
             diagnostic["casted"] = True
             valid_dtype = self._evaluate_dtype(series)
 
-        if not valid_dtype:
-            diagnostic["valid_dtype"] = False
+        diagnostic["valid_dtype"] = valid_dtype
 
         if self.check_nulls:
             nulls = self._evaluate_nulls(series)
@@ -86,6 +86,10 @@ class NumberColumn(ObjectColumn):
 
 
 class IntColumn(NumberColumn):
+    def __init__(self, check_nulls=False, check_unique=False) -> None:
+        super().__init__(check_nulls, check_unique)
+        self.check_nulls = True
+
     def _cast(self, series: pd.Series) -> pd.Series:
         try:
             coerced = super()._cast(series)
@@ -136,7 +140,7 @@ class StringColumn(ObjectColumn):
             return series
 
     def _evaluate_dtype(self, series: pd.Series) -> bool:
-        return str(series) == "string"
+        return str(series.dtype) == "string"
 
 
 class BoolColumns(ObjectColumn):
@@ -147,7 +151,7 @@ class BoolColumns(ObjectColumn):
             return series
 
     def _evaluate_dtype(self, series: pd.Series) -> bool:
-        return str(series) == "bool"
+        return str(series.dtype) == "bool"
 
 
 class CategoryColumn(ObjectColumn):
@@ -164,7 +168,7 @@ class CategoryColumn(ObjectColumn):
         return pd.Categorical(series, categories=self.__categories)
 
     def _evaluate_dtype(self, series: pd.Series) -> bool:
-        return str(series) == "str"
+        return str(series.dtype) == "str"
 
     def _pre_evaluation(self, series: pd.Series, diagnostic: Dict) -> Dict:
         nunique_vals = series.nunique()
