@@ -9,7 +9,7 @@ from src import columns
 
 def test_category_column_correct_series():
 
-    col = pd.Series(['a', 'b', 'c']).astype('category')
+    col = pd.Series(["a", "b", "c"]).astype("category")
 
     col_definition = columns.CategoryColumn()
 
@@ -21,7 +21,7 @@ def test_category_column_correct_series():
 
 def test_category_column_wrong_series_castable():
 
-    col = pd.Series(['a', 'b', 'c'])
+    col = pd.Series(["a", "b", "c"])
 
     col_definition = columns.CategoryColumn()
 
@@ -33,25 +33,31 @@ def test_category_column_wrong_series_castable():
 
 def test_category_column_wrong_series_missing_cats():
 
-    col = pd.Series(['a', 'b', 'c'])
+    col = pd.Series(["a", "b", "c"])
 
-    col_definition = columns.CategoryColumn(categories=['a', 'b'])
+    col_definition = columns.CategoryColumn(categories=["a", "b"])
 
     _, diagnostic = col_definition.evaluate(col)
 
     assert diagnostic["valid_dtype"]
     assert diagnostic["casted"]
-    assert "There are 3 unique values on the column, but 2 declared categories." in diagnostic["warnings"]
+    assert (
+        "There are 3 unique values on the column, but 2 declared categories."
+        in diagnostic["warnings"]
+    )
 
 
 def test_category_column_wrong_series_additional_cats():
 
-    col = pd.Series(['a', 'b'])
+    col = pd.Series(["a", "b"])
 
-    col_definition = columns.CategoryColumn(categories=['a', 'b', 'c'])
+    col_definition = columns.CategoryColumn(categories=["a", "b", "c"])
 
     _, diagnostic = col_definition.evaluate(col)
 
     assert diagnostic["valid_dtype"]
     assert diagnostic["casted"]
-    assert "There are 2 unique values on the column, but 3 declared categories." in diagnostic["warnings"]
+    assert (
+        "There are 2 unique values on the column, but 3 declared categories."
+        in diagnostic["warnings"]
+    )
