@@ -1,7 +1,7 @@
 """
 Validators for data validation and amendment.
 """
-from typing import Callable, Optional, Literal, Tuple, List
+from typing import Callable, Optional, Literal, Tuple, List, Union, Pattern
 from numbers import Number
 
 import pandas as pd
@@ -111,3 +111,32 @@ class NonNullValidator(Validator):
         null_values = series.isnull().sum()
 
         return null_values, not (null_values)
+
+
+class UniqueValidator(Validator):
+    def _evaluate(self, series: pd.Series) -> Tuple[int, bool]:
+
+        non_unique = series.duplicated(keep="first").sum()
+
+        return non_unique, not (non_unique)
+
+
+class PatternValidator(Validator):
+
+    column_types = [columns.StringColumn]
+
+    def __init__(
+        self,
+        mandatory: Optional[bool],
+        description: Optional[str],
+        pattern: Union[str, Pattern],
+    ) -> None:
+        super().__init__(mandatory, description)
+        self.pattern = pattern
+
+    def _evaluate(self, series: pd.Series) -> Tuple[int, bool]:
+
+        non_null = series.count()
+        match_count = series.str.fullmatch(self.pattern, case=True)
+
+        return (non_null - match_count), not ((non_null - match_count) > 0)
