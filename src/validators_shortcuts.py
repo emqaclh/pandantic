@@ -53,3 +53,7 @@ def lower_or_equal_than(max_value: Number):
 
 def in_category(categories: List):
     return validators.CategoriesValidator(categories=categories)
+
+
+def non_null():
+    return validators.NonNullValidator()

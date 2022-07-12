@@ -14,7 +14,7 @@ class Validator:
 
     column_types = [columns.ObjectColumn]
     mandatory = False
-    description = "Empty validation."
+    description = "N/A"
     amendment = None
 
     def __init__(self, mandatory: Optional[bool], description: Optional[str]) -> None:
@@ -103,3 +103,11 @@ class CategoriesValidator(Validator):
         in_category = series.isin(self.categories).sum()
 
         return (non_null - in_category), not ((non_null - in_category) > 0)
+
+
+class NonNullValidator(Validator):
+    def _evaluate(self, series: pd.Series) -> Tuple[int, bool]:
+
+        null_values = series.isnull().sum()
+
+        return null_values, not (null_values)
