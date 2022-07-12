@@ -6,11 +6,11 @@ import numpy  as np
 
 from src import validators
 
-def test_categories_validator_correct_series():
+def test_unique_validator_correct_series():
 
     col = pd.Series(['a', 'b', 'c'])
 
-    validator = validators.CategoriesValidator(mandatory=False, description='Data in range', categories=['a', 'b', 'c'])
+    validator = validators.UniqueValidator(mandatory=False, description='Data in range')
 
     series, original_issue_count, issue_count, valid, amended = validator.evaluate(col)
     assert col.equals(series)
@@ -19,12 +19,12 @@ def test_categories_validator_correct_series():
     assert valid
     assert amended is False
 
-def test_categories_validator_wrong():
+def test_unique_validator_wrong():
 
-    col = pd.Series(['a', 'b', 'c', 'd'])
+    col = pd.Series(['a', 'b', 'c', 'c', 'c', 'b'])
 
-    validator = validators.CategoriesValidator(mandatory=False, description='Data in range', categories=['a', 'b', 'c'])
+    validator = validators.UniqueValidator(mandatory=False, description='Data in range')
 
     _, original_issue_count, _, valid, _ = validator.evaluate(col)
-    assert original_issue_count == 1
+    assert original_issue_count == 3
     assert valid is False
