@@ -22,16 +22,20 @@ class Validator:
         if description is not None:
             self.description = description
 
-    def evaluate(self, series) -> Tuple[pd.Series, int, bool]:
+    def evaluate(self, series) -> Tuple[pd.Series, int, int, bool, bool]:
         if not isinstance(series, pd.Series):
             raise TypeError("A pandas.Series object must be provided")
 
-        issue_count, valid = self._evaluate(series)
-        if not valid:
+        original_issue_count, valid = self._evaluate(series)
+        issue_count = original_issue_count
+        amended = False
+
+        if not valid and self.amendment is not None:
             series = self.amendment(series)
             issue_count, valid = self._evaluate(series)
+            amended = True
 
-        return series, issue_count, valid
+        return series, original_issue_count, issue_count, valid, amended
 
     # pylint: disable=unused-argument
     def _evaluate(self, series: pd.Series) -> Tuple[int, bool]:
@@ -73,9 +77,9 @@ class RangeValidator(Validator):
 
         elif np.isneginf(self.min_value):
             if self.inclusive == "right" or self.inclusive == "both":
-                result = series.le(self.min_value)
+                result = series.le(self.max_value)
             else:
-                result = series.lt(self.min_value)
+                result = series.lt(self.max_value)
 
         else:
             result = series.between(
