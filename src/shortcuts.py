@@ -73,7 +73,7 @@ def lower_or_equal_than(
     )
 
 
-def in_category(
+def in_categories(
     categories: List, mandatory: bool = False, description: str = "N/A"
 ) -> validators.CategoriesValidator:
     return validators.CategoriesValidator(mandatory, description, categories=categories)
