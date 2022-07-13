@@ -8,9 +8,6 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  SECRET_KEY: YhL+O<4O=o^ASdpd^1:Eb2rUCq6_a?okrpkks,imb~EfNG;d,)h>bZsj7/|bc(/
-
 jobs:
   build:
 
