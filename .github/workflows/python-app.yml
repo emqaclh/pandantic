@@ -1,0 +1,37 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: pytest
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  SECRET_KEY: YhL+O<4O=o^ASdpd^1:Eb2rUCq6_a?okrpkks,imb~EfNG;d,)h>bZsj7/|bc(/
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Create temp folder
+      run: |
+        mkdir /home/runner/work/_temp_files
+    - name: Set up Python 3.8.10
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.8.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Test with pytest (including test coverage)
+      run: |
+        pytest --cov-report xml:coverage.xml --cov=src
+    - name: Codecov
+      uses: codecov/codecov-action@v2.1.0
