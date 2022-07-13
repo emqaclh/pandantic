@@ -37,8 +37,7 @@ class Validator(abc.ABC):
 
         return series, original_issue_count, issue_count, valid, amended
 
-    # pylint: disable=unused-argument
-    def _evaluate(self, series: pd.Series) -> Tuple[int, bool]:
+    def _evaluate(self, series: pd.Series) -> Tuple[int, bool]: # pylint: disable=unused-argument
         raise NotImplementedError()
 
     def amend(self, amendment: Callable[[pd.Series], pd.Series]):
@@ -141,6 +140,6 @@ class PatternValidator(Validator):
     def _evaluate(self, series: pd.Series) -> Tuple[int, bool]:
 
         non_null = series.count()
-        match_count = series.str.fullmatch(self.pattern, case=True)
+        match_count = series.str.fullmatch(self.pattern, case=True).sum()
 
         return (non_null - match_count), not ((non_null - match_count) > 0)
