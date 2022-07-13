@@ -34,9 +34,9 @@ def test_datetime_column_wrong_series_castable():
 
 def test_datetime_column_wrong_series_castable_by_format():
 
-    col = pd.Series(['2020-01-01', '2020-01-01'])
+    col = pd.Series(["2020-01-01", "2020-01-01"])
 
-    col_definition = columns.DatetimeColumn(datetime_format='%Y-%m-%d')
+    col_definition = columns.DatetimeColumn(datetime_format="%Y-%m-%d")
 
     _, diagnostic = col_definition.evaluate(col)
 
@@ -46,9 +46,9 @@ def test_datetime_column_wrong_series_castable_by_format():
 
 def test_datetime_column_wrong_series_castable_wrong_format():
 
-    col = pd.Series(['2020a-01-01', '2020-01-01'])
+    col = pd.Series(["2020a-01-01", "2020-01-01"])
 
-    col_definition = columns.DatetimeColumn(datetime_format='%Y-%m-%d')
+    col_definition = columns.DatetimeColumn(datetime_format="%Y-%m-%d")
 
     _, diagnostic = col_definition.evaluate(col)
 
