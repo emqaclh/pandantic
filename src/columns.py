@@ -7,8 +7,10 @@ from typing import Dict, List, Tuple, Optional
 import pandas as pd
 import numpy as np
 
+import abc
 
-class ObjectColumn:
+
+class Column(abc.ABC):
 
     check_nulls = False
     check_unique = False
@@ -18,7 +20,7 @@ class ObjectColumn:
         self.check_unique = check_unique
 
     def _cast(self, series: pd.Series) -> pd.Series:
-        return series
+        raise NotImplementedError()
 
     def evaluate(self, series: pd.Series) -> Tuple[pd.Series, Dict]:
         diagnostic = dict(casted=False, warnings=[])
@@ -50,17 +52,18 @@ class ObjectColumn:
 
         return series, diagnostic
 
-    # pylint: disable=unused-argument
-    def _pre_evaluation(self, series: pd.Series, diagnostic: Dict) -> Dict:
+    def _pre_evaluation(
+        self, series: pd.Series, diagnostic: Dict  # pylint: disable=unused-argument
+    ) -> Dict:
         return diagnostic
 
-    # pylint: disable=unused-argument
-    def _post_evaluation(self, series: pd.Series, diagnostic: Dict) -> Dict:
+    def _post_evaluation(
+        self, series: pd.Series, diagnostic: Dict  # pylint: disable=unused-argument
+    ) -> Dict:
         return diagnostic
 
-    # pylint: disable=unused-argument
     def _evaluate_dtype(self, series: pd.Series) -> bool:
-        return True
+        raise NotImplementedError()
 
     def _evaluate_nulls(self, series: pd.Series, return_count=False) -> bool:
         nulls_count = series.isnull().sum()
@@ -72,6 +75,16 @@ class ObjectColumn:
 
     def _evaluate_uniqueness(self, series: pd.Series) -> bool:
         return series.is_unique
+
+
+class ObjectColumn(Column):
+    def _cast(self, series: pd.Series) -> pd.Series:
+        return series
+
+    def _evaluate_dtype(
+        self, series: pd.Series  # pylint: disable=unused-argument
+    ) -> bool:
+        return True
 
 
 class NumberColumn(ObjectColumn):

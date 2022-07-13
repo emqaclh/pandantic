@@ -37,7 +37,9 @@ class Validator(abc.ABC):
 
         return series, original_issue_count, issue_count, valid, amended
 
-    def _evaluate(self, series: pd.Series) -> Tuple[int, bool]: # pylint: disable=unused-argument
+    def _evaluate(
+        self, series: pd.Series
+    ) -> Tuple[int, bool]:  # pylint: disable=unused-argument
         raise NotImplementedError()
 
     def amend(self, amendment: Callable[[pd.Series], pd.Series]):
