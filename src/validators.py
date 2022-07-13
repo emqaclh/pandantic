@@ -6,11 +6,12 @@ from numbers import Number
 
 import pandas as pd
 import numpy as np
+import abc
 
 from src import columns
 
 
-class Validator:
+class Validator(abc.ABC):
 
     column_types = [columns.ObjectColumn]
     mandatory = False
@@ -38,7 +39,7 @@ class Validator:
 
     # pylint: disable=unused-argument
     def _evaluate(self, series: pd.Series) -> Tuple[int, bool]:
-        return 0, True
+        raise NotImplementedError()
 
     def amend(self, amendment: Callable[[pd.Series], pd.Series]):
         self.amendment = amendment
