@@ -19,8 +19,7 @@ class Validator:
 
     def __init__(self, mandatory: Optional[bool], description: Optional[str]) -> None:
         self.mandatory = mandatory if mandatory is not None else False
-        if description is not None:
-            self.description = description
+        self.description = description if description is not None else "N/A"
 
     def evaluate(self, series) -> Tuple[pd.Series, int, int, bool, bool]:
         if not isinstance(series, pd.Series):
