@@ -4,7 +4,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from src import shortcuts
+from pandantic import shortcuts
 
 
 def test_range_shortcuts():

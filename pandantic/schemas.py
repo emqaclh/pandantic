@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple
 import abc
 import pandas as pd
 
-from src import columns
+from pandantic import columns
 
 
 class DataFrameModel(abc.ABC):

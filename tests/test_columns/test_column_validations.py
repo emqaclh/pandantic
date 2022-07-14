@@ -2,7 +2,7 @@ import pytest  # pylint: disable=unused-import
 
 import pandas as pd
 
-from src import columns, shortcuts
+from pandantic import columns, shortcuts
 
 
 def test_int_column_range_validated_correct():

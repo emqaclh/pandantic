@@ -6,7 +6,7 @@ from numbers import Number
 
 import numpy as np
 
-from src import validators
+from pandantic import validators
 
 
 def between_range(

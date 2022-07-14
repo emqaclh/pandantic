@@ -9,7 +9,7 @@ import numpy as np
 
 import abc
 
-from src import validators
+from pandantic import validators
 
 
 class Column(abc.ABC):
