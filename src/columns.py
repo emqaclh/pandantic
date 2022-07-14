@@ -83,6 +83,7 @@ class Column(abc.ABC):
         able_to_continue = True
         for validator in self.pre_validations:
             if able_to_continue:
+
                 (
                     column,
                     original_issue_count,
@@ -90,15 +91,18 @@ class Column(abc.ABC):
                     valid,
                     amended,
                 ) = validator.evaluate(column)
+
                 partial_diagnostic = dict(
                     original_issues=original_issue_count,
                     pending_issues=issue_count,
                     applied_amend=amended,
                     validated=valid,
                 )
+
                 diagnostic["pre_validations"][
                     validator.description
                 ] = partial_diagnostic
+
                 if validator.mandatory and not valid:
                     able_to_continue = False
             else:
@@ -121,6 +125,7 @@ class Column(abc.ABC):
         able_to_continue = True
         for validator in self.post_validations:
             if able_to_continue:
+
                 (
                     column,
                     original_issue_count,
@@ -128,27 +133,33 @@ class Column(abc.ABC):
                     valid,
                     amended,
                 ) = validator.evaluate(column)
+
                 partial_diagnostic = dict(
                     original_issues=original_issue_count,
                     pending_issues=issue_count,
                     applied_amend=amended,
                     validated=valid,
                 )
+
                 diagnostic["post_validations"][
                     validator.description
                 ] = partial_diagnostic
+
                 if validator.mandatory and not valid:
                     able_to_continue = False
             else:
+
                 partial_diagnostic = dict(
                     original_issues=None,
                     pending_issues=None,
                     applied_amend=None,
                     validated=None,
                 )
+
                 diagnostic["post_validations"][
                     validator.description
                 ] = partial_diagnostic
+
         return able_to_continue, column, diagnostic
 
     def _evaluate(self, column: pd.Series, diagnostic: Dict) -> Tuple[pd.Series, Dict]:
@@ -161,6 +172,8 @@ class Column(abc.ABC):
             column = self._cast(column)
             diagnostic["casted"] = True
             valid_dtype = self._evaluate_dtype(column)
+        else:
+            diagnostic["casted"] = False
 
         diagnostic["valid_dtype"] = valid_dtype
 

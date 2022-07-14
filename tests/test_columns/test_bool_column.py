@@ -15,6 +15,8 @@ def test_bool_column_correct_series():
 
     _, diagnostic = col_definition.evaluate(col)
 
+    print(diagnostic)
+
     assert diagnostic["valid_dtype"]
     assert diagnostic["casted"] is False
 
