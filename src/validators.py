@@ -1,7 +1,7 @@
 """
 Validators for data validation and amendment.
 """
-from typing import Callable, Optional, Literal, Tuple, List, Union, Pattern
+from typing import Callable, Optional, Literal, Tuple, List, Union, Pattern, Type
 from numbers import Number
 
 import pandas as pd
@@ -21,6 +21,13 @@ class Validator(abc.ABC):
     def __init__(self, mandatory: Optional[bool], description: Optional[str]) -> None:
         self.mandatory = mandatory if mandatory is not None else False
         self.description = description if description is not None else "N/A"
+
+    def validate_caller(self, caller_class: Type["Validator"]) -> bool:
+        validation = [
+            isinstance(caller_class, validator_type)
+            for validator_type in self.column_types
+        ]
+        return any(validation)
 
     def evaluate(self, series) -> Tuple[pd.Series, int, int, bool, bool]:
         if not isinstance(series, pd.Series):
