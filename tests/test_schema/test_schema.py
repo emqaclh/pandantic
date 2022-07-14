@@ -48,7 +48,7 @@ def test_schema_wrong_invalid_dtype():
     assert not diagnostic["columns"]["column_3"]["valid_dtype"]
 
 
-def test_schema_wrong_invalid_castable():
+def test_schema_wrong_castable():
 
     df = pd.DataFrame(
         {
