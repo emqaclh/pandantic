@@ -108,15 +108,18 @@ class Column(abc.ABC):
                 if validator.mandatory and not valid:
                     able_to_continue = False
             else:
+
                 partial_diagnostic = dict(
                     original_issues=None,
                     pending_issues=None,
                     applied_amend=None,
                     validated=None,
                 )
+
                 diagnostic["pre_validations"][
                     validator.description
                 ] = partial_diagnostic
+
         return able_to_continue, column, diagnostic
 
     def _post_validate(
