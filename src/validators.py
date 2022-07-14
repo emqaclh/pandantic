@@ -1,33 +1,27 @@
 """
 Validators for data validation and amendment.
 """
-from typing import Callable, Optional, Literal, Tuple, List, Union, Pattern, Type
+from typing import Callable, Optional, Literal, Tuple, List, Union, Pattern
 from numbers import Number
 
 import pandas as pd
 import numpy as np
 import abc
 
-from src import columns
-
 
 class Validator(abc.ABC):
-
-    column_types = [columns.ObjectColumn]
-    mandatory = False
-    description = "N/A"
-    amendment = None
-
-    def __init__(self, mandatory: Optional[bool], description: Optional[str]) -> None:
+    def __init__(
+        self,
+        mandatory: Optional[bool] = None,
+        description: Optional[str] = None,
+        requires_prevalidation: Optional[bool] = None,
+    ) -> None:
         self.mandatory = mandatory if mandatory is not None else False
         self.description = description if description is not None else "N/A"
-
-    def validate_caller(self, caller_class: Type["Validator"]) -> bool:
-        validation = [
-            isinstance(caller_class, validator_type)
-            for validator_type in self.column_types
-        ]
-        return any(validation)
+        self.requires_prevalidation = (
+            requires_prevalidation if requires_prevalidation is not None else True
+        )
+        self.amendment = None
 
     def evaluate(self, series) -> Tuple[pd.Series, int, int, bool, bool]:
         if not isinstance(series, pd.Series):
@@ -54,21 +48,23 @@ class Validator(abc.ABC):
 
 
 class RangeValidator(Validator):
-
-    column_types = [columns.NumberColumn]
-
     def __init__(
         self,
-        mandatory: Optional[bool],
-        description: Optional[str],
         min_value: Number,
         max_value: Number,
         inclusive: Literal["both", "neither", "left", "right"] = "both",
+        mandatory: Optional[bool] = None,
+        description: Optional[str] = None,
+        requires_prevalidation: Optional[bool] = None,
     ) -> None:
-        super().__init__(mandatory, description)
 
         if min_value is None or max_value is None:
             raise ValueError("min_value and max_value must be provided.")
+
+        if description is None:
+            description = f"Values are between {min_value} and {max_value} ({inclusive} inclusive)"
+
+        super().__init__(mandatory, description, requires_prevalidation)
 
         self.inclusive = inclusive
         self.min_value, self.max_value = min_value, max_value
@@ -101,11 +97,20 @@ class RangeValidator(Validator):
 
 class CategoriesValidator(Validator):
     def __init__(
-        self, mandatory: Optional[bool], description: Optional[str], categories: List
+        self,
+        categories: List,
+        mandatory: Optional[bool] = None,
+        description: Optional[str] = None,
+        requires_prevalidation: Optional[bool] = None,
     ) -> None:
-        super().__init__(mandatory, description)
+
         if not len(categories):
             raise ValueError("Categories list cannot be empty.")
+
+        if description is None:
+            description = f'Possible values: {", ".join(categories) if len(categories) < 7 else ", ".join(categories[:3]) + " … " + ", ".join(categories[:-3])}.'
+
+        super().__init__(mandatory, description, requires_prevalidation)
 
         self.categories = categories
 
@@ -118,6 +123,18 @@ class CategoriesValidator(Validator):
 
 
 class NonNullValidator(Validator):
+    def __init__(
+        self,
+        mandatory: Optional[bool] = None,
+        description: Optional[str] = None,
+        requires_prevalidation: Optional[bool] = None,
+    ) -> None:
+
+        if description is None:
+            description = "No null values."
+
+        super().__init__(mandatory, description, requires_prevalidation)
+
     def _evaluate(self, series: pd.Series) -> Tuple[int, bool]:
 
         null_values = series.isnull().sum()
@@ -126,6 +143,18 @@ class NonNullValidator(Validator):
 
 
 class UniqueValidator(Validator):
+    def __init__(
+        self,
+        mandatory: Optional[bool] = None,
+        description: Optional[str] = None,
+        requires_prevalidation: Optional[bool] = None,
+    ) -> None:
+
+        if description is None:
+            description = "Only unique values."
+
+        super().__init__(mandatory, description, requires_prevalidation)
+
     def _evaluate(self, series: pd.Series) -> Tuple[int, bool]:
 
         non_unique = series.duplicated(keep="first").sum()
@@ -134,16 +163,18 @@ class UniqueValidator(Validator):
 
 
 class PatternValidator(Validator):
-
-    column_types = [columns.StringColumn]
-
     def __init__(
         self,
-        mandatory: Optional[bool],
-        description: Optional[str],
         pattern: Union[str, Pattern],
+        mandatory: Optional[bool] = None,
+        description: Optional[str] = None,
+        requires_prevalidation: Optional[bool] = None,
     ) -> None:
-        super().__init__(mandatory, description)
+
+        if description is None:
+            description = f"Values matches {pattern}."
+
+        super().__init__(mandatory, description, requires_prevalidation)
         self.pattern = pattern
 
     def _evaluate(self, series: pd.Series) -> Tuple[int, bool]:
