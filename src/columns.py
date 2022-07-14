@@ -14,13 +14,15 @@ from src import validators
 
 class Column(abc.ABC):
 
-    pre_validations: List[Type[validators.Validator]] = []
-    post_validations: List[Type[validators.Validator]] = []
+    pre_validations: List[Type[validators.Validator]]
+    post_validations: List[Type[validators.Validator]]
 
     def __init__(
         self,
         validations: Optional[Union[List, Tuple]] = None,
     ) -> None:
+        self.pre_validations = []
+        self.post_validations = []
         if validations is not None:
             for validator in validations:
 
@@ -284,8 +286,8 @@ class DatetimeColumn(ObjectColumn):
 
     def __init__(
         self,
-        validations: Optional[Union[List, Tuple]] = None,
         datetime_format: Optional[str] = None,
+        validations: Optional[Union[List, Tuple]] = None,
     ) -> None:
         super().__init__(validations)
         self.__datetime_format = datetime_format
