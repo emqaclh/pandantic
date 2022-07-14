@@ -92,7 +92,7 @@ class Column(abc.ABC):
                 ) = validator.evaluate(column)
                 partial_diagnostic = dict(
                     original_issues=original_issue_count,
-                    pending_issue_count=issue_count,
+                    pending_issues=issue_count,
                     applied_amend=amended,
                     validated=valid,
                 )
@@ -104,7 +104,7 @@ class Column(abc.ABC):
             else:
                 partial_diagnostic = dict(
                     original_issues=None,
-                    pending_issue_count=None,
+                    pending_issues=None,
                     applied_amend=None,
                     validated=None,
                 )
@@ -130,7 +130,7 @@ class Column(abc.ABC):
                 ) = validator.evaluate(column)
                 partial_diagnostic = dict(
                     original_issues=original_issue_count,
-                    pending_issue_count=issue_count,
+                    pending_issues=issue_count,
                     applied_amend=amended,
                     validated=valid,
                 )
@@ -142,7 +142,7 @@ class Column(abc.ABC):
             else:
                 partial_diagnostic = dict(
                     original_issues=None,
-                    pending_issue_count=None,
+                    pending_issues=None,
                     applied_amend=None,
                     validated=None,
                 )
