@@ -44,7 +44,7 @@ class DataFrameModel(abc.ABC):
 
         schema_eval = not missing_columns and not remaining_columns
         columns_eval = [
-            bool(col["post_valid"]) for col in diagnostic["column"].values()
+            bool(col["post_valid"]) for col in diagnostic["columns"].values()
         ]
 
         general_eval = [schema_eval, all(columns_eval)]
