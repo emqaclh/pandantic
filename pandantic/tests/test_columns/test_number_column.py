@@ -4,7 +4,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from src import columns
+from pandantic import columns
 
 
 def test_number_column_correct_series():

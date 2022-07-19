@@ -4,28 +4,26 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from src import columns
+from pandantic import columns
 
 
-def test_bool_column_correct_series():
+def test_category_column_correct_series():
 
-    col = pd.Series([True, True, False])
+    col = pd.Series(["a", "b", "c"]).astype("category")
 
-    col_definition = columns.BoolColumn()
+    col_definition = columns.CategoryColumn()
 
     _, diagnostic = col_definition.evaluate(col)
-
-    print(diagnostic)
 
     assert diagnostic["valid_dtype"]
     assert diagnostic["casted"] is False
 
 
-def test_bool_column_wrong_series_misc_values():
+def test_category_column_wrong_series_castable():
 
-    col = pd.Series([True, 1, 2.4, 0, 8, "a"])
+    col = pd.Series(["a", "b", "c"])
 
-    col_definition = columns.BoolColumn()
+    col_definition = columns.CategoryColumn()
 
     _, diagnostic = col_definition.evaluate(col)
 

@@ -4,14 +4,14 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from src import columns
+from pandantic import columns
 
 
-def test_category_column_correct_series():
+def test_int_column_correct_series():
 
-    col = pd.Series(["a", "b", "c"]).astype("category")
+    col = pd.Series([0, 0, 1])
 
-    col_definition = columns.CategoryColumn()
+    col_definition = columns.IntColumn()
 
     _, diagnostic = col_definition.evaluate(col)
 
@@ -19,11 +19,11 @@ def test_category_column_correct_series():
     assert diagnostic["casted"] is False
 
 
-def test_category_column_wrong_series_castable():
+def test_int_column_wrong_series_float():
 
-    col = pd.Series(["a", "b", "c"])
+    col = pd.Series([0, 0, 1.5])
 
-    col_definition = columns.CategoryColumn()
+    col_definition = columns.IntColumn()
 
     _, diagnostic = col_definition.evaluate(col)
 

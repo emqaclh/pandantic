@@ -2,14 +2,13 @@
 Declares columns for main pandas datatypes:
 Object, Numbers (float and int), Booleans, Datetime and Categories.
 """
-from typing import Dict, List, Tuple, Optional, Union, Type
-
-import pandas as pd
-import numpy as np
-
 import abc
+from typing import Dict, List, Optional, Tuple, Type, Union
 
-from src import validators
+import numpy as np
+import pandas as pd
+
+from pandantic import validators
 
 
 class Column(abc.ABC):
@@ -81,7 +80,7 @@ class Column(abc.ABC):
         self, column: pd.Series, diagnostic: Dict
     ) -> Tuple[bool, pd.Series, Dict]:
         column = column.copy()
-        diagnostic["pre_validations"] = dict()
+        diagnostic["pre_validations"] = []
         able_to_continue = True
         for validator in self.pre_validations:
             if able_to_continue:
@@ -99,11 +98,10 @@ class Column(abc.ABC):
                     pending_issues=issue_count,
                     applied_amend=amended,
                     validated=valid,
+                    description=validator.description,
                 )
 
-                diagnostic["pre_validations"][
-                    validator.description
-                ] = partial_diagnostic
+                diagnostic["pre_validations"].append(partial_diagnostic)
 
                 if validator.mandatory and not valid:
                     able_to_continue = False
@@ -114,11 +112,10 @@ class Column(abc.ABC):
                     pending_issues=None,
                     applied_amend=None,
                     validated=None,
+                    description=validator.description,
                 )
 
-                diagnostic["pre_validations"][
-                    validator.description
-                ] = partial_diagnostic
+                diagnostic["pre_validations"].append(partial_diagnostic)
 
         return able_to_continue, column, diagnostic
 
@@ -126,7 +123,7 @@ class Column(abc.ABC):
         self, column: pd.Series, diagnostic: Dict
     ) -> Tuple[bool, pd.Series, Dict]:
         column = column.copy()
-        diagnostic["post_validations"] = dict()
+        diagnostic["post_validations"] = []
         able_to_continue = True
         for validator in self.post_validations:
             if able_to_continue:
@@ -144,11 +141,10 @@ class Column(abc.ABC):
                     pending_issues=issue_count,
                     applied_amend=amended,
                     validated=valid,
+                    description=validator.description,
                 )
 
-                diagnostic["post_validations"][
-                    validator.description
-                ] = partial_diagnostic
+                diagnostic["post_validations"].append(partial_diagnostic)
 
                 if validator.mandatory and not valid:
                     able_to_continue = False
@@ -159,11 +155,10 @@ class Column(abc.ABC):
                     pending_issues=None,
                     applied_amend=None,
                     validated=None,
+                    description=validator.description,
                 )
 
-                diagnostic["post_validations"][
-                    validator.description
-                ] = partial_diagnostic
+                diagnostic["post_validations"].append(partial_diagnostic)
 
         return able_to_continue, column, diagnostic
 

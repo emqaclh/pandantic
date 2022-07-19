@@ -4,7 +4,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from src import validators
+from pandantic import validators
 
 
 def test_range_validator_correct_series():

@@ -1,12 +1,12 @@
 """
 Declares the base schema to evaluate and process pandas DataFrames.
 """
+import abc
 from typing import Dict, List, Tuple
 
-import abc
 import pandas as pd
 
-from src import columns
+from pandantic import columns
 
 
 class DataFrameModel(abc.ABC):
@@ -42,7 +42,14 @@ class DataFrameModel(abc.ABC):
 
         dataframe.columns = original_column_names
 
-        return True, diagnostic, dataframe
+        schema_eval = not missing_columns and not remaining_columns
+        columns_eval = [
+            bool(col["post_valid"]) for col in diagnostic["columns"].values()
+        ]
+
+        general_eval = [schema_eval, all(columns_eval)]
+
+        return all(general_eval), diagnostic, dataframe
 
     def transform_column_names(self, dataframe: pd.DataFrame) -> List:
         return list(dataframe.columns)

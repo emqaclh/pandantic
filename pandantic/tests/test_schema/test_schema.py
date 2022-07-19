@@ -3,7 +3,7 @@ import pytest
 
 import pandas as pd
 
-from src import columns, schemas
+from pandantic import columns, schemas
 
 
 def test_schema_success():
