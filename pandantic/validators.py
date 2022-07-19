@@ -12,17 +12,9 @@ from pandantic import validations
 
 
 class Validator(abc.ABC):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
         self.mandatory = mandatory if mandatory is not None else False
         self.description = description if description is not None else "N/A"
-        self.requires_prevalidation = (
-            requires_prevalidation if requires_prevalidation is not None else True
-        )
         self.amendment = None
 
     def evaluate(self, column) -> Tuple[pd.Series, validations.Validation]:
@@ -98,7 +90,6 @@ class RangeValidator(Validator):
         inclusive: Literal["both", "neither", "left", "right"] = "both",
         mandatory: bool = True,
         description: str = None,
-        requires_prevalidation: bool = True,
     ) -> None:
 
         if min_value is None or max_value is None:
@@ -107,7 +98,7 @@ class RangeValidator(Validator):
         if description is None:
             description = f"Values are between {min_value} and {max_value} ({inclusive} inclusive)"
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
         self.inclusive = inclusive
         self.min_value, self.max_value = min_value, max_value
@@ -140,11 +131,7 @@ class RangeValidator(Validator):
 
 class CategoriesValidator(Validator):
     def __init__(
-        self,
-        categories: List,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
+        self, categories: List, mandatory: bool = True, description: str = None
     ) -> None:
 
         if not len(categories):
@@ -153,7 +140,7 @@ class CategoriesValidator(Validator):
         if description is None:
             description = f'Possible values: {", ".join(categories) if len(categories) < 7 else ", ".join(categories[:3]) + " … " + ", ".join(categories[:-3])}.'
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
         self.categories = categories
 
@@ -166,17 +153,12 @@ class CategoriesValidator(Validator):
 
 
 class NonNullValidator(Validator):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
 
         if description is None:
             description = "No null values."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
 
@@ -186,17 +168,12 @@ class NonNullValidator(Validator):
 
 
 class UniqueValidator(Validator):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
 
         if description is None:
             description = "Only unique values."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
 
@@ -211,13 +188,12 @@ class PatternValidator(Validator):
         pattern: Union[str, Pattern],
         mandatory: bool = True,
         description: str = None,
-        requires_prevalidation: bool = True,
     ) -> None:
 
         if description is None:
             description = f"Values matches {pattern}."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
         self.pattern = pattern
 
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
