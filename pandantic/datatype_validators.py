@@ -14,6 +14,22 @@ class DatatypeValidator(validators.Validator, abc.ABC):
     pass
 
 
+class ObjectColumnValidator(DatatypeValidator):
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
+
+        if description is None:
+            description = "Column is a numeric dtype."
+
+        super().__init__(mandatory, description)
+
+        self.amendment = lambda column: column.astype("object")
+
+    def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
+        valid_dtype = str(column.dtype) == "object"
+
+        return 0 if valid_dtype else len(column), valid_dtype
+
+
 class NumericColumnValidator(DatatypeValidator):
     def __init__(self, mandatory: bool = True, description: str = None) -> None:
 
