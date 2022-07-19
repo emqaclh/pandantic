@@ -13,6 +13,10 @@ class Validation:
     def __init__(self, description: str) -> None:
         self.description = description
         self.amended = False
+        self.valid = False
+        self.original_issues = None
+        self.pending_issues = None
+        self.additional_info = None
 
 
 class SuspendedValidation(Validation):
