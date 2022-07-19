@@ -33,7 +33,7 @@ class ValidationError(Validation, Exception):
 
 class ValidationSet:
 
-    validations: List
+    validations: List[Validation]
 
     def __init__(self) -> None:
         self.validations = []
