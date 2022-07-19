@@ -8,13 +8,12 @@ from typing import Dict, List, Optional, Tuple, Type, Union
 import numpy as np
 import pandas as pd
 
-from pandantic import validators
+from pandantic import datatype_validators, validations, validators
 
 
-class Column(abc.ABC):
+class BaseColumn(abc.ABC):
 
-    pre_validations: List[Type[validators.Validator]]
-    post_validations: List[Type[validators.Validator]]
+    column_validators: validators.ValidatorSet
 
     def __init__(
         self,
@@ -183,7 +182,7 @@ class Column(abc.ABC):
         raise NotImplementedError()
 
 
-class ObjectColumn(Column):
+class Column(BaseColumn):
     def _cast(self, column: pd.Series) -> pd.Series:
         return column
 
@@ -193,7 +192,11 @@ class ObjectColumn(Column):
         return True
 
 
-class NumberColumn(ObjectColumn):
+class ObjectColumn(Column):
+    pass
+
+
+class NumberColumn(Column):
     def _cast(self, column: pd.Series) -> pd.Series:
         return pd.to_numeric(column, errors="ignore")
 
@@ -204,7 +207,7 @@ class NumberColumn(ObjectColumn):
             return False
 
 
-class IntColumn(NumberColumn):
+class IntColumn(Column):
     def _cast(self, column: pd.Series) -> pd.Series:
         try:
             coerced = super()._cast(column)
@@ -219,7 +222,7 @@ class IntColumn(NumberColumn):
             return False
 
 
-class FloatColumn(NumberColumn):
+class FloatColumn(Column):
     def _cast(self, column: pd.Series) -> pd.Series:
         try:
             coerced = super()._cast(column)
@@ -237,7 +240,7 @@ class FloatColumn(NumberColumn):
             return False
 
 
-class StringColumn(ObjectColumn):
+class StringColumn(Column):
     def _cast(self, column: pd.Series) -> pd.Series:
         try:
             return column.astype(pd.StringDtype())
@@ -248,7 +251,7 @@ class StringColumn(ObjectColumn):
         return str(column.dtype) == "string"
 
 
-class BoolColumn(ObjectColumn):
+class BoolColumn(Column):
     def _cast(self, column: pd.Series) -> pd.Series:
         try:
             return column.astype(bool)
@@ -259,7 +262,7 @@ class BoolColumn(ObjectColumn):
         return str(column.dtype) == "bool"
 
 
-class CategoryColumn(ObjectColumn):
+class CategoryColumn(Column):
 
     __categories = None
 
@@ -278,7 +281,7 @@ class CategoryColumn(ObjectColumn):
         return str(column.dtype) == "category"
 
 
-class DatetimeColumn(ObjectColumn):
+class DatetimeColumn(Column):
 
     __datetime_format = None
 

@@ -1,12 +1,14 @@
 """
 Validators for data validation and amendment.
 """
-from typing import Callable, Literal, Tuple, List, Union, Pattern, Type
-from numbers import Number
-
-import pandas as pd
-import numpy as np
 import abc
+from numbers import Number
+from typing import Callable, List, Literal, Optional, Pattern, Tuple, Type, Union
+
+import numpy as np
+import pandas as pd
+
+from pandantic import validations
 
 
 class Validator(abc.ABC):
@@ -23,20 +25,34 @@ class Validator(abc.ABC):
         )
         self.amendment = None
 
-    def evaluate(self, column) -> Tuple[pd.Series, int, int, bool, bool]:
+    def evaluate(self, column) -> Tuple[pd.Series, validations.Validation]:
         if not isinstance(column, pd.Series):
             raise TypeError("A pandas.Series object must be provided")
 
-        original_issue_count, valid = self._evaluate(column)
-        issue_count = original_issue_count
-        amended = False
+        column = column.copy()
 
-        if not valid and self.amendment is not None:
-            column = self.amendment(column)
-            issue_count, valid = self._evaluate(column)
-            amended = True
+        try:
 
-        return column, original_issue_count, issue_count, valid, amended
+            validation = validations.Validation(self.description)
+
+            original_issue_count, valid = self._evaluate(column)
+            validation.original_issues = original_issue_count
+            validation.pending_issues = original_issue_count
+
+            if not valid and self.amendment is not None:
+                column = self.amendment(column)
+                issue_count, valid = self._evaluate(column)
+                validation.pending_issues = issue_count
+                validation.amended = True
+
+            validation.valid = valid
+
+            return column, validation
+
+        except Exception as error:
+            raise validations.ValidationError(self.description, error).with_traceback(
+                error.__traceback__
+            )
 
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
         raise NotImplementedError()
@@ -46,6 +62,32 @@ class Validator(abc.ABC):
     ) -> Type["Validator"]:
         self.amendment = amendment
         return self
+
+
+class ValidatorSet:
+
+    validators: list
+
+    def __init__(self) -> None:
+        self.validators = []
+
+    def add_validator(self, validator: Validator):
+        if not isinstance(validator, Validator):
+            raise ValueError(f"Validator expected, got {type(validator)} instead.")
+        else:
+            self.validators.append(validator)
+
+    def get_validators(
+        self, requires_prevalidation: Optional[bool] = None
+    ) -> List[Validator]:
+        if requires_prevalidation is not None:
+            return [
+                validator
+                for validator in self.validators
+                if validator.requires_prevalidation == requires_prevalidation
+            ]
+        else:
+            return self.validators
 
 
 class RangeValidator(Validator):
@@ -183,4 +225,4 @@ class PatternValidator(Validator):
         non_null = column.count()
         match_count = column.str.fullmatch(self.pattern, case=True).sum()
 
-        return (non_null - match_count), not ((non_null - match_count) > 0)
+        return (non_null - match_count), not (non_null - match_count) > 0

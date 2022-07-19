@@ -1,8 +1,7 @@
 # pylint: disable=unused-import
-import pytest
-
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
 from pandantic import validators
 
@@ -13,12 +12,12 @@ def test_unique_validator_correct_series():
 
     validator = validators.UniqueValidator(mandatory=False, description="Data in range")
 
-    series, original_issue_count, issue_count, valid, amended = validator.evaluate(col)
+    series, validation = validator.evaluate(col)
     assert col.equals(series)
-    assert not original_issue_count
-    assert not issue_count
-    assert valid
-    assert amended is False
+    assert not validation.original_issues
+    assert not validation.pending_issues
+    assert validation.valid
+    assert validation.amended is False
 
 
 def test_unique_validator_wrong():
@@ -27,6 +26,6 @@ def test_unique_validator_wrong():
 
     validator = validators.UniqueValidator(mandatory=False, description="Data in range")
 
-    _, original_issue_count, _, valid, _ = validator.evaluate(col)
-    assert original_issue_count == 3
-    assert valid is False
+    _, validation = validator.evaluate(col)
+    assert validation.original_issues == 3
+    assert validation.valid is False

@@ -1,8 +1,7 @@
 # pylint: disable=unused-import
-import pytest
-
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
 from pandantic import validators
 
@@ -15,9 +14,9 @@ def test_categories_validator_correct_series():
         mandatory=True, categories=["a", "b", "c"]
     ).add_amendment(lambda col: col.replace({"d": "c"}))
 
-    series, original_issue_count, issue_count, valid, amended = validator.evaluate(col)
+    series, validation = validator.evaluate(col)
     assert not col.equals(series)
-    assert original_issue_count == 1
-    assert issue_count == 0
-    assert valid
-    assert amended
+    assert validation.original_issues == 1
+    assert validation.pending_issues == 0
+    assert validation.valid
+    assert validation.amended
