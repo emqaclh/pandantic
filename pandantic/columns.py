@@ -3,7 +3,7 @@ Declares columns for main pandas datatypes:
 Object, Numbers (float and int), Booleans, Datetime and Categories.
 """
 import abc
-from typing import Dict, List, Optional, Tuple, Type, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -183,13 +183,7 @@ class BaseColumn(abc.ABC):
 
 
 class Column(BaseColumn):
-    def _cast(self, column: pd.Series) -> pd.Series:
-        return column
-
-    def _evaluate_dtype(
-        self, column: pd.Series  # pylint: disable=unused-argument
-    ) -> bool:
-        return True
+    pass
 
 
 class ObjectColumn(Column):
@@ -197,104 +191,28 @@ class ObjectColumn(Column):
 
 
 class NumberColumn(Column):
-    def _cast(self, column: pd.Series) -> pd.Series:
-        return pd.to_numeric(column, errors="ignore")
-
-    def _evaluate_dtype(self, column: pd.Series) -> bool:
-        try:
-            return np.issubdtype(column.dtype, np.number)
-        except TypeError:
-            return False
+    pass
 
 
 class IntColumn(Column):
-    def _cast(self, column: pd.Series) -> pd.Series:
-        try:
-            coerced = super()._cast(column)
-            return coerced.astype(int)
-        except ValueError:
-            return column
-
-    def _evaluate_dtype(self, column: pd.Series) -> bool:
-        try:
-            return np.issubdtype(column.dtype, np.int_)
-        except TypeError:
-            return False
+    pass
 
 
 class FloatColumn(Column):
-    def _cast(self, column: pd.Series) -> pd.Series:
-        try:
-            coerced = super()._cast(column)
-            return coerced.astype(float)
-        except ValueError:
-            return column
-
-    def _evaluate_dtype(self, column: pd.Series) -> bool:
-        try:
-            correct_dtype = []
-            for prec in ("16", "32", "64"):
-                correct_dtype.append(np.issubdtype(column.dtype, f"float{prec}"))
-            return any(correct_dtype)
-        except TypeError:
-            return False
+    pass
 
 
 class StringColumn(Column):
-    def _cast(self, column: pd.Series) -> pd.Series:
-        try:
-            return column.astype(pd.StringDtype())
-        except ValueError:
-            return column
-
-    def _evaluate_dtype(self, column: pd.Series) -> bool:
-        return str(column.dtype) == "string"
+    pass
 
 
 class BoolColumn(Column):
-    def _cast(self, column: pd.Series) -> pd.Series:
-        try:
-            return column.astype(bool)
-        except ValueError:
-            return column
-
-    def _evaluate_dtype(self, column: pd.Series) -> bool:
-        return str(column.dtype) == "bool"
+    pass
 
 
 class CategoryColumn(Column):
-
-    __categories = None
-
-    def __init__(
-        self,
-        validations: Optional[Union[List, Tuple]] = None,
-        categories: Optional[List] = None,
-    ) -> None:
-        super().__init__(validations)
-        self.__categories = categories
-
-    def _cast(self, column: pd.Series) -> pd.Series:
-        return pd.Categorical(column, categories=self.__categories)
-
-    def _evaluate_dtype(self, column: pd.Series) -> bool:
-        return str(column.dtype) == "category"
+    pass
 
 
 class DatetimeColumn(Column):
-
-    __datetime_format = None
-
-    def __init__(
-        self,
-        datetime_format: Optional[str] = None,
-        validations: Optional[Union[List, Tuple]] = None,
-    ) -> None:
-        super().__init__(validations)
-        self.__datetime_format = datetime_format
-
-    def _cast(self, column: pd.Series) -> pd.Series:
-        return pd.to_datetime(column, errors="ignore", format=self.__datetime_format)
-
-    def _evaluate_dtype(self, column: pd.Series) -> bool:
-        return "datetime" in str(column.dtype)
+    pass
