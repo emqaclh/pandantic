@@ -17,9 +17,12 @@ class Validator(abc.ABC):
         self.description = description if description is not None else "N/A"
         self.amendment = None
 
-    def evaluate(self, column) -> Tuple[pd.Series, validations.Validation]:
+    def validate_pandas_series(self, column) -> None:
         if not isinstance(column, pd.Series):
             raise TypeError("A pandas.Series object must be provided")
+
+    def evaluate(self, column) -> Tuple[pd.Series, validations.Validation]:
+        self.validate_pandas_series(column)
 
         column = column.copy()
 

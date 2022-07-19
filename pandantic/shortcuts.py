@@ -38,10 +38,7 @@ def greater_than(
 
 
 def greater_or_equal_than(
-    min_value: Number,
-    mandatory: bool = None,
-    description: str = None,
-    requires_prevalidation: Optional[bool] = None,
+    min_value: Number, mandatory: bool = None, description: str = None
 ) -> validators.RangeValidator:
     return validators.RangeValidator(
         min_value=min_value,
@@ -85,15 +82,9 @@ def in_categories(
 
 
 def non_null(
-    mandatory: bool = None,
-    description: str = None,
-    requires_prevalidation: Optional[bool] = None,
+    mandatory: bool = None, description: str = None
 ) -> validators.NonNullValidator:
-    return validators.NonNullValidator(
-        mandatory=mandatory,
-        description=description,
-        requires_prevalidation=requires_prevalidation,
-    )
+    return validators.NonNullValidator(mandatory=mandatory, description=description)
 
 
 def is_unique(

@@ -15,17 +15,12 @@ class DatatypeValidator(validators.Validator, abc.ABC):
 
 
 class NumericColumnValidator(DatatypeValidator):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
 
         if description is None:
             description = "Column is a numeric dtype."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
         self.amendment = lambda column: pd.to_numeric(column, errors="ignore")
 
@@ -37,40 +32,30 @@ class NumericColumnValidator(DatatypeValidator):
 
 
 class IntegerColumnValidator(NumericColumnValidator):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
 
         if description is None:
             description = "Column is integer numeric dtype."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
         self.amendment = lambda column: pd.to_numeric(
             column, downcast="integer", errors="ignore"
         )
 
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
-        valid_dtype = np.issubdtype(column.dtype, np.int_)
+        valid_dtype = pd.api.types.is_integer_dtype(column.dtype)
 
         return 0 if valid_dtype else len(column), valid_dtype
 
 
 class FloatColumnValidator(DatatypeValidator):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
 
         if description is None:
             description = "Column is float numeric dtype."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
         self.amendment = lambda column: pd.to_numeric(
             column, downcast="float", errors="ignore"
@@ -88,17 +73,12 @@ class FloatColumnValidator(DatatypeValidator):
 
 
 class StringColumnValidator(DatatypeValidator):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
 
         if description is None:
             description = "Column is string dtype."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
         self.amendment = lambda column: column.astype(pd.StringDtype())
 
@@ -109,17 +89,12 @@ class StringColumnValidator(DatatypeValidator):
 
 
 class BoolColumnValidator(DatatypeValidator):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
 
         if description is None:
             description = "Column is bool dtype."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
         self.amendment = lambda column: column.astype(bool)
 
@@ -130,21 +105,21 @@ class BoolColumnValidator(DatatypeValidator):
 
 
 class CategoryColumnValidator(DatatypeValidator):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
 
         if description is None:
             description = "Column is categorical dtype."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
-        self.amendment = lambda column: pd.Categorical(
-            column
-        )  # pylint: disable=unnecessary-lambda
+        # pylint: disable=unnecessary-lambda
+        self.amendment = lambda column: pd.Categorical(column)
+
+    def validate_pandas_series(self, column) -> None:
+        if not isinstance(column, pd.Series) and not isinstance(
+            column, pd.core.arrays.categorical.Categorical
+        ):
+            raise TypeError("A pandas.Series object must be provided")
 
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
         valid_dtype = str(column.dtype) == "category"
@@ -160,14 +135,13 @@ class DatetimeColumnValidator(DatatypeValidator):
         self,
         mandatory: bool = True,
         description: str = None,
-        requires_prevalidation: bool = True,
         datetime_format: Optional[str] = None,
     ) -> None:
 
         if description is None:
             description = "Column is a datetime dtype."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
         self.__datetime_format = datetime_format
 
         self.amendment = lambda column: pd.to_datetime(
