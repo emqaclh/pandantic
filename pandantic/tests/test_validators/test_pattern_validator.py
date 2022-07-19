@@ -1,8 +1,7 @@
 # pylint: disable=unused-import
-import pytest
-
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
 from pandantic import validators
 
@@ -15,12 +14,12 @@ def test_pattern_validator_correct_series():
         mandatory=False, description="Data in range", pattern=r".{1}_"
     )
 
-    series, original_issue_count, issue_count, valid, amended = validator.evaluate(col)
+    series, validation = validator.evaluate(col)
     assert col.equals(series)
-    assert not original_issue_count
-    assert not issue_count
-    assert valid
-    assert amended is False
+    assert not validation.original_issues
+    assert not validation.original_issues
+    assert validation.valid
+    assert validation.amended is False
 
 
 def test_pattern_validator_wrong_series():
@@ -31,5 +30,5 @@ def test_pattern_validator_wrong_series():
         mandatory=False, description="Data in range", pattern=r".{1}_"
     )
 
-    _, original_issue_count, _, _, _ = validator.evaluate(col)
-    assert original_issue_count == 1
+    _, validation = validator.evaluate(col)
+    assert validation.original_issues == 1

@@ -1,42 +1,53 @@
 """
 Validators for data validation and amendment.
 """
-from typing import Callable, Literal, Tuple, List, Union, Pattern, Type
-from numbers import Number
-
-import pandas as pd
-import numpy as np
 import abc
+from numbers import Number
+from typing import Callable, List, Literal, Pattern, Tuple, Type, Union
+
+import numpy as np
+import pandas as pd
+
+from pandantic import validations
 
 
 class Validator(abc.ABC):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
         self.mandatory = mandatory if mandatory is not None else False
         self.description = description if description is not None else "N/A"
-        self.requires_prevalidation = (
-            requires_prevalidation if requires_prevalidation is not None else True
-        )
         self.amendment = None
 
-    def evaluate(self, column) -> Tuple[pd.Series, int, int, bool, bool]:
+    def validate_pandas_series(self, column) -> None:
         if not isinstance(column, pd.Series):
             raise TypeError("A pandas.Series object must be provided")
 
-        original_issue_count, valid = self._evaluate(column)
-        issue_count = original_issue_count
-        amended = False
+    def evaluate(self, column) -> Tuple[pd.Series, validations.Validation]:
+        self.validate_pandas_series(column)
 
-        if not valid and self.amendment is not None:
-            column = self.amendment(column)
-            issue_count, valid = self._evaluate(column)
-            amended = True
+        column = column.copy()
 
-        return column, original_issue_count, issue_count, valid, amended
+        try:
+
+            validation = validations.Validation(self.description)
+
+            original_issue_count, valid = self._evaluate(column)
+            validation.original_issues = original_issue_count
+            validation.pending_issues = original_issue_count
+
+            if not valid and self.amendment is not None:
+                column = self.amendment(column)
+                issue_count, valid = self._evaluate(column)
+                validation.pending_issues = issue_count
+                validation.amended = True
+
+            validation.valid = valid
+
+            return column, validation
+
+        except Exception as error:
+            raise validations.ValidationError(self.description, error).with_traceback(
+                error.__traceback__
+            )
 
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
         raise NotImplementedError()
@@ -48,6 +59,48 @@ class Validator(abc.ABC):
         return self
 
 
+class ValidatorSet:
+
+    validators: List[Validator]
+
+    def __init__(self) -> None:
+        self.validators = []
+
+    def add_validator(self, validator: Validator):
+        if not isinstance(validator, Validator):
+            raise ValueError(f"Validator expected, got {type(validator)} instead.")
+        else:
+            self.validators.append(validator)
+
+    def validate(
+        self, column: pd.Series
+    ) -> Tuple[pd.Series, validations.ValidationSet]:
+
+        column = column.copy()
+        validation_set = validations.ValidationSet()
+        keep_validating = True
+
+        for validator in self.validators:
+
+            if keep_validating:
+                try:
+                    column, validation = validator.evaluate(column)
+                except validations.ValidationError as error:
+                    validation = error
+            else:
+                validation = validations.SuspendedValidation(validator.description)
+
+            validation_set.add_validation(validation)
+            if (
+                (validation.valid is False and validator.mandatory)
+                or isinstance(validation, validations.ValidationError)
+                or (not keep_validating)
+            ):
+                keep_validating = False
+
+        return column, validation_set
+
+
 class RangeValidator(Validator):
     def __init__(
         self,
@@ -56,7 +109,6 @@ class RangeValidator(Validator):
         inclusive: Literal["both", "neither", "left", "right"] = "both",
         mandatory: bool = True,
         description: str = None,
-        requires_prevalidation: bool = True,
     ) -> None:
 
         if min_value is None or max_value is None:
@@ -65,7 +117,7 @@ class RangeValidator(Validator):
         if description is None:
             description = f"Values are between {min_value} and {max_value} ({inclusive} inclusive)"
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
         self.inclusive = inclusive
         self.min_value, self.max_value = min_value, max_value
@@ -98,11 +150,7 @@ class RangeValidator(Validator):
 
 class CategoriesValidator(Validator):
     def __init__(
-        self,
-        categories: List,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
+        self, categories: List, mandatory: bool = True, description: str = None
     ) -> None:
 
         if not len(categories):
@@ -111,7 +159,7 @@ class CategoriesValidator(Validator):
         if description is None:
             description = f'Possible values: {", ".join(categories) if len(categories) < 7 else ", ".join(categories[:3]) + " … " + ", ".join(categories[:-3])}.'
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
         self.categories = categories
 
@@ -124,17 +172,12 @@ class CategoriesValidator(Validator):
 
 
 class NonNullValidator(Validator):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
 
         if description is None:
             description = "No null values."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
 
@@ -144,17 +187,12 @@ class NonNullValidator(Validator):
 
 
 class UniqueValidator(Validator):
-    def __init__(
-        self,
-        mandatory: bool = True,
-        description: str = None,
-        requires_prevalidation: bool = True,
-    ) -> None:
+    def __init__(self, mandatory: bool = True, description: str = None) -> None:
 
         if description is None:
             description = "Only unique values."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
 
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
 
@@ -169,13 +207,12 @@ class PatternValidator(Validator):
         pattern: Union[str, Pattern],
         mandatory: bool = True,
         description: str = None,
-        requires_prevalidation: bool = True,
     ) -> None:
 
         if description is None:
             description = f"Values matches {pattern}."
 
-        super().__init__(mandatory, description, requires_prevalidation)
+        super().__init__(mandatory, description)
         self.pattern = pattern
 
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
@@ -183,4 +220,4 @@ class PatternValidator(Validator):
         non_null = column.count()
         match_count = column.str.fullmatch(self.pattern, case=True).sum()
 
-        return (non_null - match_count), not ((non_null - match_count) > 0)
+        return (non_null - match_count), not (non_null - match_count) > 0

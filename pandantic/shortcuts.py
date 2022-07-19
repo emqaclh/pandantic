@@ -15,7 +15,6 @@ def between_range(
     inclusive: Literal["both", "neither", "left", "right"] = "both",
     mandatory: Optional[bool] = None,
     description: Optional[str] = None,
-    requires_prevalidation: Optional[bool] = None,
 ) -> validators.RangeValidator:
     return validators.RangeValidator(
         min_value=min_value,
@@ -23,15 +22,11 @@ def between_range(
         inclusive=inclusive,
         mandatory=mandatory,
         description=description,
-        requires_prevalidation=requires_prevalidation,
     )
 
 
 def greater_than(
-    min_value: Number,
-    mandatory: bool = None,
-    description: str = None,
-    requires_prevalidation: Optional[bool] = None,
+    min_value: Number, mandatory: bool = None, description: str = None
 ) -> validators.RangeValidator:
     return validators.RangeValidator(
         min_value=min_value,
@@ -39,15 +34,11 @@ def greater_than(
         inclusive="neither",
         mandatory=mandatory,
         description=description,
-        requires_prevalidation=requires_prevalidation,
     )
 
 
 def greater_or_equal_than(
-    min_value: Number,
-    mandatory: bool = None,
-    description: str = None,
-    requires_prevalidation: Optional[bool] = None,
+    min_value: Number, mandatory: bool = None, description: str = None
 ) -> validators.RangeValidator:
     return validators.RangeValidator(
         min_value=min_value,
@@ -55,15 +46,11 @@ def greater_or_equal_than(
         inclusive="left",
         mandatory=mandatory,
         description=description,
-        requires_prevalidation=requires_prevalidation,
     )
 
 
 def lower_than(
-    max_value: Number,
-    mandatory: bool = None,
-    description: str = None,
-    requires_prevalidation: Optional[bool] = None,
+    max_value: Number, mandatory: bool = None, description: str = None
 ) -> validators.RangeValidator:
     return validators.RangeValidator(
         min_value=-np.inf,
@@ -71,15 +58,11 @@ def lower_than(
         inclusive="neither",
         mandatory=mandatory,
         description=description,
-        requires_prevalidation=requires_prevalidation,
     )
 
 
 def lower_or_equal_than(
-    max_value: Number,
-    mandatory: bool = None,
-    description: str = None,
-    requires_prevalidation: Optional[bool] = None,
+    max_value: Number, mandatory: bool = None, description: str = None
 ) -> validators.RangeValidator:
     return validators.RangeValidator(
         min_value=-np.inf,
@@ -87,57 +70,32 @@ def lower_or_equal_than(
         inclusive="right",
         mandatory=mandatory,
         description=description,
-        requires_prevalidation=requires_prevalidation,
     )
 
 
 def in_categories(
-    categories: List,
-    mandatory: bool = None,
-    description: str = None,
-    requires_prevalidation: Optional[bool] = None,
+    categories: List, mandatory: bool = None, description: str = None
 ) -> validators.CategoriesValidator:
     return validators.CategoriesValidator(
-        categories=categories,
-        mandatory=mandatory,
-        description=description,
-        requires_prevalidation=requires_prevalidation,
+        categories=categories, mandatory=mandatory, description=description
     )
 
 
 def non_null(
-    mandatory: bool = None,
-    description: str = None,
-    requires_prevalidation: Optional[bool] = None,
+    mandatory: bool = None, description: str = None
 ) -> validators.NonNullValidator:
-    return validators.NonNullValidator(
-        mandatory=mandatory,
-        description=description,
-        requires_prevalidation=requires_prevalidation,
-    )
+    return validators.NonNullValidator(mandatory=mandatory, description=description)
 
 
 def is_unique(
-    mandatory: bool = None,
-    description: str = None,
-    requires_prevalidation: Optional[bool] = None,
+    mandatory: bool = None, description: str = None
 ) -> validators.UniqueValidator:
-    return validators.UniqueValidator(
-        mandatory=mandatory,
-        description=description,
-        requires_prevalidation=requires_prevalidation,
-    )
+    return validators.UniqueValidator(mandatory=mandatory, description=description)
 
 
 def match_pattern(
-    pattern: Union[str, Pattern],
-    mandatory: bool = None,
-    description: str = None,
-    requires_prevalidation: Optional[bool] = None,
+    pattern: Union[str, Pattern], mandatory: bool = None, description: str = None
 ) -> validators.PatternValidator:
     return validators.PatternValidator(
-        pattern=pattern,
-        mandatory=mandatory,
-        description=description,
-        requires_prevalidation=requires_prevalidation,
+        pattern=pattern, mandatory=mandatory, description=description
     )
