@@ -95,6 +95,8 @@ class ValidatorSet:
             ):
                 keep_validating = False
 
+        return column, validation_set
+
 
 class RangeValidator(Validator):
     def __init__(
