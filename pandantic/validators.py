@@ -3,7 +3,7 @@ Validators for data validation and amendment.
 """
 import abc
 from numbers import Number
-from typing import Callable, List, Literal, Optional, Pattern, Tuple, Type, Union
+from typing import Callable, List, Literal, Pattern, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -58,7 +58,7 @@ class Validator(abc.ABC):
 
 class ValidatorSet:
 
-    validators: list
+    validators: List[Validator]
 
     def __init__(self) -> None:
         self.validators = []
@@ -69,17 +69,31 @@ class ValidatorSet:
         else:
             self.validators.append(validator)
 
-    def get_validators(
-        self, requires_prevalidation: Optional[bool] = None
-    ) -> List[Validator]:
-        if requires_prevalidation is not None:
-            return [
-                validator
-                for validator in self.validators
-                if validator.requires_prevalidation == requires_prevalidation
-            ]
-        else:
-            return self.validators
+    def validate(
+        self, column: pd.Series
+    ) -> Tuple[pd.Series, validations.ValidationSet]:
+
+        column = column.copy()
+        validation_set = validations.ValidationSet()
+        keep_validating = True
+
+        for validator in self.validators:
+
+            if keep_validating:
+                try:
+                    column, validation = validator.evaluate(column)
+                except validations.ValidationError as error:
+                    validation = error
+            else:
+                validation = validations.SuspendedValidation(validator.description)
+
+            validation_set.add_validation(validation)
+            if (
+                (validation.valid is False and validator.mandatory)
+                or isinstance(validation, validations.ValidationError)
+                or (not keep_validating)
+            ):
+                keep_validating = False
 
 
 class RangeValidator(Validator):
