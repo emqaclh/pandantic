@@ -162,7 +162,8 @@ class CategoriesValidator(Validator):
             raise ValueError("Categories list cannot be empty.")
 
         if description is None:
-            description = f'Possible values: {", ".join(categories) if len(categories) < 7 else ", ".join(categories[:3]) + " … " + ", ".join(categories[:-3])}.'
+            _str_categories = list(map(str, categories))
+            description = f'Possible values: {", ".join(_str_categories) if len(categories) < 7 else ", ".join(_str_categories[:3]) + " … " + ", ".join(_str_categories[:-3])}.'
 
         super().__init__(mandatory, description)
 
