@@ -5,7 +5,7 @@ import pandas as pd
 
 from pandantic import columns, schemas
 
-"""
+
 def test_schema_success():
 
     df = pd.DataFrame({"column_1": [0, 2, 3], "column_2": [True, True, False]})
@@ -17,10 +17,10 @@ def test_schema_success():
 
     schema_obj = TestSchema()
 
-    _, diagnostic, _ = schema_obj.evaluate(df)
+    _, evaluation = schema_obj.evaluate(df, "test")
 
-    assert diagnostic["columns"]["column_1"]["valid_dtype"]
-    assert diagnostic["columns"]["column_2"]["valid_dtype"]
+    assert evaluation.column_1.valid
+    assert evaluation.column_2.valid
 
 
 def test_schema_wrong_invalid_dtype():
@@ -41,11 +41,11 @@ def test_schema_wrong_invalid_dtype():
 
     schema_obj = TestSchema()
 
-    _, diagnostic, _ = schema_obj.evaluate(df)
+    _, evaluation = schema_obj.evaluate(df, "test")
 
-    assert diagnostic["columns"]["column_1"]["valid_dtype"]
-    assert diagnostic["columns"]["column_2"]["valid_dtype"]
-    assert not diagnostic["columns"]["column_3"]["valid_dtype"]
+    assert evaluation.column_1.valid
+    assert evaluation.column_2.valid
+    assert evaluation.column_3.valid is False
 
 
 def test_schema_wrong_castable():
@@ -66,12 +66,11 @@ def test_schema_wrong_castable():
 
     schema_obj = TestSchema()
 
-    _, diagnostic, _ = schema_obj.evaluate(df)
+    _, evaluation = schema_obj.evaluate(df, "test")
 
-    assert diagnostic["columns"]["column_1"]["valid_dtype"]
-    assert not diagnostic["columns"]["column_1"]["casted"]
-    assert diagnostic["columns"]["column_2"]["valid_dtype"]
-    assert not diagnostic["columns"]["column_2"]["casted"]
-    assert diagnostic["columns"]["column_3"]["valid_dtype"]
-    assert diagnostic["columns"]["column_3"]["casted"]
-"""
+    assert evaluation.column_1.valid
+    assert not evaluation.column_1.amended
+    assert evaluation.column_2.valid
+    assert not evaluation.column_2.amended
+    assert evaluation.column_3.valid
+    assert evaluation.column_3.amended
