@@ -9,14 +9,14 @@ def test_int_column_range_validated_correct():
 
     col = pd.Series([0, 0, 1])
 
-    col_definition = columns.IntColumn(validations=[shortcuts.between_range(0, 5)])
+    col_definition = columns.IntColumn(
+        column_validations=[shortcuts.between_range(0, 5)]
+    )
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["pre_valid"]
-    assert diagnostic["post_valid"]
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"] is False
+    assert evaluation.valid
+    assert evaluation.amended is False
 
 
 def test_int_column_range_validated_wrong():
@@ -24,26 +24,9 @@ def test_int_column_range_validated_wrong():
     col = pd.Series([0, 0, 1, 8])
 
     col_definition = columns.IntColumn(
-        validations=[shortcuts.between_range(0, 5, mandatory=True)]
+        column_validations=[shortcuts.between_range(0, 5, mandatory=True)]
     )
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["pre_valid"]
-    assert diagnostic["post_valid"] is False
-
-
-def test_int_column_range_validated_wrong_pre():
-
-    col = pd.Series([0, 0, 1, 8])
-
-    col_definition = columns.IntColumn(
-        validations=[
-            shortcuts.between_range(0, 5, mandatory=True, requires_prevalidation=False)
-        ]
-    )
-
-    _, diagnostic = col_definition.evaluate(col)
-
-    assert diagnostic["pre_valid"] is False
-    assert diagnostic["post_valid"] is None
+    assert evaluation.valid is False

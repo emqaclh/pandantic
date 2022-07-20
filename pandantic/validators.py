@@ -3,7 +3,7 @@ Validators for data validation and amendment.
 """
 import abc
 from numbers import Number
-from typing import Callable, List, Literal, Pattern, Tuple, Type, Union
+from typing import Callable, List, Literal, Pattern, Tuple, Type, Union, Iterator
 
 import numpy as np
 import pandas as pd
@@ -28,7 +28,7 @@ class Validator(abc.ABC):
 
         try:
 
-            validation = validations.Validation(self.description)
+            validation = validations.Validation(self.description, self.mandatory)
 
             original_issue_count, valid = self._evaluate(column)
             validation.original_issues = original_issue_count
@@ -45,9 +45,9 @@ class Validator(abc.ABC):
             return column, validation
 
         except Exception as error:
-            raise validations.ValidationError(self.description, error).with_traceback(
-                error.__traceback__
-            )
+            raise validations.ValidationError(
+                self.description, self.mandatory, error
+            ).with_traceback(error.__traceback__)
 
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
         raise NotImplementedError()
@@ -65,6 +65,9 @@ class ValidatorSet:
 
     def __init__(self) -> None:
         self.validators = []
+
+    def __iter__(self) -> Iterator[Validator]:
+        return iter(self.validators)
 
     def add_validator(self, validator: Validator):
         if not isinstance(validator, Validator):
@@ -88,7 +91,9 @@ class ValidatorSet:
                 except validations.ValidationError as error:
                     validation = error
             else:
-                validation = validations.SuspendedValidation(validator.description)
+                validation = validations.SuspendedValidation(
+                    validator.description, validator.mandatory
+                )
 
             validation_set.add_validation(validation)
             if (

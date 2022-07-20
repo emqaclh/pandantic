@@ -13,10 +13,10 @@ def test_int_column_correct_series():
 
     col_definition = columns.IntColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"] is False
+    assert evaluation.valid
+    assert evaluation.amended is False
 
 
 def test_int_column_wrong_series_float():
@@ -25,7 +25,7 @@ def test_int_column_wrong_series_float():
 
     col_definition = columns.IntColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"]
+    assert evaluation.valid is False
+    assert evaluation.amended

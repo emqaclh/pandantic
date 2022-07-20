@@ -13,10 +13,10 @@ def test_number_column_correct_series():
 
     col_definition = columns.NumberColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"] is False
+    assert evaluation.valid
+    assert evaluation.amended is False
 
 
 def test_number_column_wrong_series():
@@ -25,10 +25,10 @@ def test_number_column_wrong_series():
 
     col_definition = columns.NumberColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"] is False
-    assert diagnostic["casted"]
+    assert evaluation.valid is False
+    assert evaluation.amended
 
 
 def test_number_column_fixable_series():
@@ -37,7 +37,7 @@ def test_number_column_fixable_series():
 
     col_definition = columns.NumberColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"]
+    assert evaluation.valid
+    assert evaluation.amended
