@@ -18,7 +18,7 @@ class BaseColumn(abc.ABC):
         self,
         column_validations: Optional[Union[List, Tuple]] = None,
     ) -> None:
-        column_validators = validators.ValidatorSet()
+        self.column_validators = validators.ValidatorSet()
         if column_validations is not None:
             for validator in column_validations:
 
@@ -27,7 +27,7 @@ class BaseColumn(abc.ABC):
                         "You must provide a list or tuple of validators only."
                     )
 
-                column_validators.add_validator(validator)
+                self.column_validators.add_validator(validator)
 
         any_datatype_validator = [
             isinstance(validator, datatype_validators.DatatypeValidator)
@@ -40,9 +40,10 @@ class BaseColumn(abc.ABC):
 
     def check_dtype_consistency(self) -> None:
         inferred_dtype = self.infer_dtype()
-        if type(self.check_dtype) != inferred_dtype:
+        declared_dtype = type(self.check_dtype())
+        if declared_dtype != inferred_dtype:
             raise UserWarning(
-                "Column implicit dtype differs from the one inferred from the validations."
+                f"Column declared dtype {str(declared_dtype)} differs from the one inferred from the validations {str(inferred_dtype)}."
             )
 
     def check_dtype(self) -> datatype_validators.DatatypeValidator:
@@ -51,10 +52,8 @@ class BaseColumn(abc.ABC):
     def infer_dtype(self) -> datatype_validators.DatatypeValidator:
         dtype_validators = [
             validator
-            for validator in self.column_validators.validators
-            if isinstance(
-                validator, datatype_validators, datatype_validators.DatatypeValidator
-            )
+            for validator in self.column_validators
+            if isinstance(validator, datatype_validators.DatatypeValidator)
         ]
         last_dtype_validator = dtype_validators[-1]
         return type(last_dtype_validator)
@@ -65,12 +64,42 @@ class BaseColumn(abc.ABC):
 
         column = column.copy()
         column, validation = self.column_validators.validate(column)
-        return column, validation
+        column_eval = ColumnEvaluation(validation)
+        return column, column_eval
+
+
+class ColumnEvaluation:
+
+    validation_set: validations.ValidationSet
+    valid: bool
+    amended: bool
+    warnings: bool
+
+    def __init__(self, validation_set: validations.ValidationSet) -> None:
+        self.validation_set = validation_set
+        self.check_validations()
+
+    def check_validations(self):
+        self.valid = all(
+            [
+                validation.valid
+                for validation in self.validation_set
+                if validation.mandatory
+            ]
+        )
+        self.amended = any([validation.amended for validation in self.validation_set])
+        self.warnings = any(
+            [
+                not validation.valid
+                for validation in self.validation_set
+                if not validation.mandatory
+            ]
+        )
 
 
 class Column(BaseColumn):
     def check_dtype(self) -> datatype_validators.ObjectColumnValidator:
-        raise datatype_validators.ObjectColumnValidator()
+        return datatype_validators.ObjectColumnValidator()
 
 
 class ObjectColumn(Column):
@@ -79,36 +108,47 @@ class ObjectColumn(Column):
 
 class NumberColumn(Column):
     def check_dtype(self) -> datatype_validators.NumericColumnValidator:
-        raise datatype_validators.NumericColumnValidator()
+        return datatype_validators.NumericColumnValidator()
 
 
 class IntColumn(Column):
     def check_dtype(self) -> datatype_validators.IntegerColumnValidator:
-        raise datatype_validators.IntegerColumnValidator()
+        return datatype_validators.IntegerColumnValidator()
 
 
 class FloatColumn(Column):
     def check_dtype(self) -> datatype_validators.FloatColumnValidator:
-        raise datatype_validators.FloatColumnValidator()
+        return datatype_validators.FloatColumnValidator()
 
 
 class StringColumn(Column):
     def check_dtype(self) -> datatype_validators.StringColumnValidator:
-        raise datatype_validators.StringColumnValidator()
+        return datatype_validators.StringColumnValidator()
 
 
 class BoolColumn(Column):
     def check_dtype(self) -> datatype_validators.BoolColumnValidator:
-        raise datatype_validators.BoolColumnValidator()
+        return datatype_validators.BoolColumnValidator()
 
 
 class CategoryColumn(Column):
     def check_dtype(self) -> datatype_validators.CategoryColumnValidator:
-        raise datatype_validators.CategoryColumnValidator()
+        return datatype_validators.CategoryColumnValidator()
 
 
 class DatetimeColumn(Column):
+    def __init__(
+        self,
+        column_validations: Optional[Union[List, Tuple]] = None,
+        datetime_format: Optional[str] = None,
+    ) -> None:
+        self.datetime_format = datetime_format
+        super().__init__(column_validations)
+
     def check_dtype(
         self, datetime_format: Optional[str] = None
     ) -> datatype_validators.DatetimeColumnValidator:
-        raise datatype_validators.DatetimeColumnValidator(datetime_format)
+        _datetime_format = (
+            datetime_format if datetime_format is not None else self.datetime_format
+        )
+        return datatype_validators.DatetimeColumnValidator(_datetime_format)

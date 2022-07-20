@@ -13,10 +13,10 @@ def test_category_column_correct_series():
 
     col_definition = columns.CategoryColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"] is False
+    assert evaluation.valid
+    assert evaluation.amended is False
 
 
 def test_category_column_wrong_series_castable():
@@ -25,7 +25,7 @@ def test_category_column_wrong_series_castable():
 
     col_definition = columns.CategoryColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"]
+    assert evaluation.valid
+    assert evaluation.amended

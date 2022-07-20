@@ -9,12 +9,10 @@ from pandantic import columns
 
 def test_object_column_default_values():
 
-    col = pd.Series([0, 0, 0])
+    col = pd.Series([0, 0, 0]).astype(object)
 
     col_definition = columns.ObjectColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert "nulls" not in diagnostic
-    assert "unique" not in diagnostic
-    assert diagnostic["casted"] is False
+    assert evaluation.amended is False

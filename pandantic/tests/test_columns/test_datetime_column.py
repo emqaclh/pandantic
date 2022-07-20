@@ -14,10 +14,10 @@ def test_datetime_column_correct_series():
 
     col_definition = columns.DatetimeColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"] is False
+    assert evaluation.valid
+    assert evaluation.amended is False
 
 
 def test_datetime_column_wrong_series_castable():
@@ -26,10 +26,10 @@ def test_datetime_column_wrong_series_castable():
 
     col_definition = columns.DatetimeColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"]
+    assert evaluation.valid
+    assert evaluation.amended
 
 
 def test_datetime_column_wrong_series_castable_by_format():
@@ -38,10 +38,10 @@ def test_datetime_column_wrong_series_castable_by_format():
 
     col_definition = columns.DatetimeColumn(datetime_format="%Y-%m-%d")
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"]
+    assert evaluation.valid
+    assert evaluation.amended
 
 
 def test_datetime_column_wrong_series_castable_wrong_format():
@@ -50,7 +50,7 @@ def test_datetime_column_wrong_series_castable_wrong_format():
 
     col_definition = columns.DatetimeColumn(datetime_format="%Y-%m-%d")
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"] is False
-    assert diagnostic["casted"]
+    assert evaluation.valid is False
+    assert evaluation.amended

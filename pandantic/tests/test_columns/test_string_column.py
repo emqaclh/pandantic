@@ -13,10 +13,10 @@ def test_string_column_correct_series():
 
     col_definition = columns.StringColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"] is False
+    assert evaluation.valid
+    assert evaluation.amended is False
 
 
 def test_string_column_wrong_series_str_like_object():
@@ -25,10 +25,10 @@ def test_string_column_wrong_series_str_like_object():
 
     col_definition = columns.StringColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"]
+    assert evaluation.valid
+    assert evaluation.amended
 
 
 def test_string_column_wrong_series_int():
@@ -37,10 +37,10 @@ def test_string_column_wrong_series_int():
 
     col_definition = columns.StringColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"]
+    assert evaluation.valid
+    assert evaluation.amended
 
 
 def test_string_column_wrong_series_bool():
@@ -49,7 +49,7 @@ def test_string_column_wrong_series_bool():
 
     col_definition = columns.StringColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"]
+    assert evaluation.valid
+    assert evaluation.amended
