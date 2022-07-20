@@ -1,6 +1,6 @@
 # pandantic
 
-<img src="https://github.com/emqaclh/pandantic/blob/release-0.7.1/docs/assets/header.png?raw=true" width="456px">
+<img src="https://raw.githubusercontent.com/emqaclh/pandantic/release-0.7.1/docs/assets/header.png" width="456px">
 
 
 > "To be an insufferable twit by arguing by definition"
