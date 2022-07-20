@@ -13,7 +13,7 @@ from pandantic import validations
 
 class Validator(abc.ABC):
     def __init__(self, mandatory: bool = True, description: str = None) -> None:
-        self.mandatory = mandatory if mandatory is not None else False
+        self.mandatory = mandatory if mandatory is not None else True
         self.description = description if description is not None else "N/A"
         self.amendment = None
 
