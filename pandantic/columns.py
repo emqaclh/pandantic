@@ -7,7 +7,7 @@ from typing import List, Optional, Tuple, Union
 
 import pandas as pd
 
-from pandantic import datatype_validators, validations, validators
+from pandantic import datatype_validators, validations, validators, evaluations
 
 
 class BaseColumn(abc.ABC):
@@ -64,37 +64,8 @@ class BaseColumn(abc.ABC):
 
         column = column.copy()
         column, validation = self.column_validators.validate(column)
-        column_eval = ColumnEvaluation(validation)
+        column_eval = evaluations.ColumnEvaluation(validation)
         return column, column_eval
-
-
-class ColumnEvaluation:
-
-    validation_set: validations.ValidationSet
-    valid: bool
-    amended: bool
-    warnings: bool
-
-    def __init__(self, validation_set: validations.ValidationSet) -> None:
-        self.validation_set = validation_set
-        self.check_validations()
-
-    def check_validations(self):
-        self.valid = all(
-            [
-                validation.valid
-                for validation in self.validation_set
-                if validation.mandatory
-            ]
-        )
-        self.amended = any([validation.amended for validation in self.validation_set])
-        self.warnings = any(
-            [
-                not validation.valid
-                for validation in self.validation_set
-                if not validation.mandatory
-            ]
-        )
 
 
 class Column(BaseColumn):
