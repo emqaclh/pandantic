@@ -1,7 +1,7 @@
 # pandantic
-
-<img src="https://raw.githubusercontent.com/emqaclh/pandantic/release-0.7.1/docs/assets/header.png" width="456px">
-
+<p align="center">
+    <img src="https://raw.githubusercontent.com/emqaclh/pandantic/release-0.7.1/docs/assets/header.png" width="348px">
+</p>
 
 > "To be an insufferable twit by arguing by definition"
 
