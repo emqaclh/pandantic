@@ -52,9 +52,9 @@ class DataFrameModel(abc.ABC):
 
         dataframe.columns = original_column_names
 
-        dataframe_evaluation(**evaluation_data)
+        evaluation = dataframe_evaluation(**evaluation_data)
 
-        return dataframe, evaluation_data
+        return dataframe, evaluation
 
     def transform_column_names(self, dataframe: pd.DataFrame) -> List:
         return list(dataframe.columns)

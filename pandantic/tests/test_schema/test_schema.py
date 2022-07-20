@@ -19,8 +19,8 @@ def test_schema_success():
 
     _, evaluation = schema_obj.evaluate(df, "test")
 
-    assert evaluation["column_1"].valid
-    assert evaluation["column_2"].valid
+    assert evaluation.column_1.valid
+    assert evaluation.column_2.valid
 
 
 def test_schema_wrong_invalid_dtype():
@@ -43,9 +43,9 @@ def test_schema_wrong_invalid_dtype():
 
     _, evaluation = schema_obj.evaluate(df, "test")
 
-    assert evaluation["column_1"].valid
-    assert evaluation["column_2"].valid
-    assert evaluation["column_3"].valid is False
+    assert evaluation.column_1.valid
+    assert evaluation.column_2.valid
+    assert evaluation.column_3.valid is False
 
 
 def test_schema_wrong_castable():
@@ -68,9 +68,9 @@ def test_schema_wrong_castable():
 
     _, evaluation = schema_obj.evaluate(df, "test")
 
-    assert evaluation["column_1"].valid
-    assert not evaluation["column_1"].amended
-    assert evaluation["column_2"].valid
-    assert not evaluation["column_2"].amended
-    assert evaluation["column_3"].valid
-    assert evaluation["column_3"].amended
+    assert evaluation.column_1.valid
+    assert not evaluation.column_1.amended
+    assert evaluation.column_2.valid
+    assert not evaluation.column_2.amended
+    assert evaluation.column_3.valid
+    assert evaluation.column_3.amended
