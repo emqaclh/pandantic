@@ -27,6 +27,8 @@ class DataFrameModel(abc.ABC):
         if not name or name is None:
             raise ValueError("name should be correctly declared.")
 
+        dataframe = dataframe.copy()
+
         original_column_names = list(dataframe.columns)
         dataframe.columns = self.transform_column_names(dataframe)
 
