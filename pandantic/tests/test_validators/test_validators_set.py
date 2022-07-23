@@ -11,7 +11,7 @@ def test_validator_set_success():
     col = pd.Series(["1", "2", "3", "4", np.nan])
 
     validator_set = validators.ValidatorSet()
-    non_null_validator = shortcuts.non_null().add_amendment(
+    non_null_validator = shortcuts.non_null().set_amendment(
         lambda column: column.fillna("5")
     )
     int_validator = datatype_validators.IntegerColumnValidator()
@@ -35,7 +35,7 @@ def test_validator_set_suspended():
     col = pd.Series(["1", "2", "3", "4", np.nan])
 
     validator_set = validators.ValidatorSet()
-    non_null_validator = shortcuts.non_null().add_amendment(
+    non_null_validator = shortcuts.non_null().set_amendment(
         lambda column: column.fillna("5")
     )
     int_validator = datatype_validators.IntegerColumnValidator()
@@ -61,7 +61,7 @@ def test_validator_set_error():
     col = pd.Series(["1", "2", "3", "4", np.nan])
 
     validator_set = validators.ValidatorSet()
-    non_null_validator = shortcuts.non_null().add_amendment(
+    non_null_validator = shortcuts.non_null().set_amendment(
         lambda column: column.fillna("5")
     )
     below_three_validator = shortcuts.lower_or_equal_than(3, mandatory=True)

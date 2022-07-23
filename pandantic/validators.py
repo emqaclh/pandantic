@@ -13,7 +13,7 @@ from pandantic import validations
 
 class Validator(abc.ABC):
     def __init__(self, mandatory: bool = True, description: str = None) -> None:
-        self.mandatory = mandatory if mandatory is not None else False
+        self.mandatory = mandatory if mandatory is not None else True
         self.description = description if description is not None else "N/A"
         self.amendment = None
 
@@ -52,7 +52,7 @@ class Validator(abc.ABC):
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
         raise NotImplementedError()
 
-    def add_amendment(
+    def set_amendment(
         self, amendment: Callable[[pd.Series], pd.Series]
     ) -> Type["Validator"]:
         self.amendment = amendment
@@ -162,7 +162,8 @@ class CategoriesValidator(Validator):
             raise ValueError("Categories list cannot be empty.")
 
         if description is None:
-            description = f'Possible values: {", ".join(categories) if len(categories) < 7 else ", ".join(categories[:3]) + " … " + ", ".join(categories[:-3])}.'
+            _str_categories = list(map(str, categories))
+            description = f'Possible values: {", ".join(_str_categories) if len(categories) < 7 else ", ".join(_str_categories[:3]) + " … " + ", ".join(_str_categories[:-3])}.'
 
         super().__init__(mandatory, description)
 
