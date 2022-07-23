@@ -52,7 +52,7 @@ class Validator(abc.ABC):
     def _evaluate(self, column: pd.Series) -> Tuple[int, bool]:
         raise NotImplementedError()
 
-    def add_amendment(
+    def set_amendment(
         self, amendment: Callable[[pd.Series], pd.Series]
     ) -> Type["Validator"]:
         self.amendment = amendment
