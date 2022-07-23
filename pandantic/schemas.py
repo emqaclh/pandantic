@@ -56,7 +56,13 @@ class DataFrameModel(abc.ABC):
 
         evaluation = dataframe_evaluation(**evaluation_data)
 
-        all_valid = all([_eval.valid for _eval in evaluation_data.values()])
+        all_valid = all(
+            [
+                _eval.valid
+                for _eval in evaluation_data.values()
+                if _eval.valid is not None
+            ]
+        )
         if not all_valid:
             raise SchemaEvaluationException(
                 "There is invalid columns.", evaluation=evaluation
@@ -64,12 +70,12 @@ class DataFrameModel(abc.ABC):
 
         warning_columns = []
         for column_name, column_eval in evaluation_data.items():
-            if column_eval and column_eval is not None:
+            if column_eval.warnings and column_eval.warnings is not None:
                 warning_columns.append(column_name)
 
         if missing_columns or remaining_columns or warning_columns:
             raise SchemaEvaluationWarning(
-                f"There is {len(missing_columns)} columns, {len(remaining_columns)} remaining columns and {len(warning_columns)} invalid non-mandatory evaluated columns.",
+                f"There is {len(missing_columns)} missing columns, {len(remaining_columns)} remaining columns and {len(warning_columns)} invalid non-mandatory evaluated columns.",
                 missing_columns=missing_columns,
                 remaining_columns=remaining_columns,
                 warning_columns=warning_columns,
