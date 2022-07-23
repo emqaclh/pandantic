@@ -163,7 +163,7 @@ class CategoriesValidator(Validator):
 
         if description is None:
             _str_categories = list(map(str, categories))
-            description = f'Possible values: {", ".join(_str_categories) if len(categories) < 7 else ", ".join(_str_categories[:3]) + " … " + ", ".join(_str_categories[:-3])}.'
+            description = f'Possible values: {", ".join(_str_categories) if len(categories) < 7 else ", ".join(_str_categories[:3]) + " … " + ", ".join(_str_categories[-3:])}.'
 
         super().__init__(mandatory, description)
 
