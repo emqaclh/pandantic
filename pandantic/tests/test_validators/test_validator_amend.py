@@ -12,7 +12,7 @@ def test_categories_validator_correct_series():
 
     validator = validators.CategoriesValidator(
         mandatory=True, categories=["a", "b", "c"]
-    ).add_amendment(lambda col: col.replace({"d": "c"}))
+    ).set_amendment(lambda col: col.replace({"d": "c"}))
 
     series, validation = validator.evaluate(col)
     assert not col.equals(series)
