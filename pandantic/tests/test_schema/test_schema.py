@@ -90,7 +90,7 @@ def test_schema_warning_missing_cols():
 
     schema_obj = TestSchema()
 
-    with pytest.raises(schemas.SchemaEvaluationWarning) as record:
+    with pytest.warns(schemas.SchemaEvaluationWarning) as record:
         _, evaluation = schema_obj.evaluate(df, "test")
 
         if not record:
