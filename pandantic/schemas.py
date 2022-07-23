@@ -56,6 +56,25 @@ class DataFrameModel(abc.ABC):
 
         evaluation = dataframe_evaluation(**evaluation_data)
 
+        all_valid = all([_eval.valid for _eval in evaluation_data.values()])
+        if not all_valid:
+            raise SchemaEvaluationException(
+                "There is invalid columns.", evaluation=evaluation
+            )
+
+        warning_columns = []
+        for column_name, column_eval in evaluation_data.items():
+            if column_eval and column_eval is not None:
+                warning_columns.append(column_name)
+
+        if missing_columns or remaining_columns or warning_columns:
+            raise SchemaEvaluationWarning(
+                f"There is {len(missing_columns)} columns, {len(remaining_columns)} remaining columns and {len(warning_columns)} invalid non-mandatory evaluated columns.",
+                missing_columns=missing_columns,
+                remaining_columns=remaining_columns,
+                warning_columns=warning_columns,
+            )
+
         return dataframe, evaluation
 
     def transform_column_names(self, dataframe: pd.DataFrame) -> List:
@@ -72,3 +91,32 @@ class DataFrameModel(abc.ABC):
 
     def get_columns(self) -> Dict[str, columns.Column]:
         return self.columns
+
+
+class SchemaEvaluationWarning(UserWarning):
+    missing_columns: List
+    remaining_columns: List
+    warning_columns: List
+
+    def __init__(
+        self,
+        *args: object,
+        missing_columns: List,
+        remaining_columns: List,
+        warning_columns: List,
+    ) -> None:
+        super().__init__(*args)
+        if missing_columns is not None:
+            self.missing_columns = missing_columns
+        if remaining_columns is not None:
+            self.remaining_columns = remaining_columns
+        if warning_columns is not None:
+            self.remaining_columns = warning_columns
+
+
+class SchemaEvaluationException(Exception):
+    evaluation: NamedTuple
+
+    def __init__(self, *args: object, evaluation: NamedTuple) -> None:
+        super().__init__(*args)
+        self.evaluation = evaluation
