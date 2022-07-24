@@ -1,0 +1,9 @@
+site_name: pandantic
+nav:
+  - Home: index.md
+theme:
+  name: materia
+  highlightjs: true
+  hljs_languages:
+    - yaml
+    - python
