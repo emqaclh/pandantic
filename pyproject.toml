@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pandantic"
-version = "0.1.0"
+version = "0.7.0"
 description = "DataFrame parsing and validation"
 authors = ["Alexis Villanueva (emqaclh) <villanueva.alexis17@gmail.com>"]
 license = "MIT"

@@ -4,7 +4,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from src import columns
+from pandantic import columns
 
 
 def test_bool_column_correct_series():
@@ -13,10 +13,10 @@ def test_bool_column_correct_series():
 
     col_definition = columns.BoolColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"] is False
+    assert evaluation.valid
+    assert evaluation.amended is False
 
 
 def test_bool_column_wrong_series_misc_values():
@@ -25,7 +25,7 @@ def test_bool_column_wrong_series_misc_values():
 
     col_definition = columns.BoolColumn()
 
-    _, diagnostic = col_definition.evaluate(col)
+    _, evaluation = col_definition.evaluate(col)
 
-    assert diagnostic["valid_dtype"]
-    assert diagnostic["casted"]
+    assert evaluation.valid
+    assert evaluation.amended

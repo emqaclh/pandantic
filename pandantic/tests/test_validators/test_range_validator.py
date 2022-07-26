@@ -1,10 +1,9 @@
 # pylint: disable=unused-import
+import numpy as np
+import pandas as pd
 import pytest
 
-import pandas as pd
-import numpy as np
-
-from src import validators
+from pandantic import validators
 
 
 def test_range_validator_correct_series():
@@ -15,12 +14,12 @@ def test_range_validator_correct_series():
         mandatory=False, description="Data in range", min_value=0, max_value=5
     )
 
-    series, original_issue_count, issue_count, valid, amended = validator.evaluate(col)
+    series, validation = validator.evaluate(col)
     assert col.equals(series)
-    assert not original_issue_count
-    assert not issue_count
-    assert valid
-    assert amended is False
+    assert not validation.original_issues
+    assert not validation.pending_issues
+    assert validation.valid
+    assert validation.amended is False
 
 
 def test_range_validator_wrong_series():
@@ -31,12 +30,12 @@ def test_range_validator_wrong_series():
         mandatory=False, description="Data in range", min_value=0, max_value=5
     )
 
-    series, original_issue_count, issue_count, valid, amended = validator.evaluate(col)
+    series, validation = validator.evaluate(col)
     assert col.equals(series)
-    assert original_issue_count
-    assert issue_count
-    assert valid is False
-    assert amended is False
+    assert validation.original_issues
+    assert validation.pending_issues
+    assert validation.valid is False
+    assert validation.amended is False
 
 
 def test_range_validator_wrong_series_boundaries():
@@ -51,12 +50,12 @@ def test_range_validator_wrong_series_boundaries():
         inclusive="left",
     )
 
-    series, original_issue_count, issue_count, valid, amended = validator.evaluate(col)
+    series, validation = validator.evaluate(col)
     assert col.equals(series)
-    assert original_issue_count
-    assert issue_count
-    assert valid is False
-    assert amended is False
+    assert validation.original_issues
+    assert validation.pending_issues
+    assert validation.valid is False
+    assert validation.amended is False
 
     col = pd.Series([0, 2, 3, 7])
 
@@ -68,12 +67,12 @@ def test_range_validator_wrong_series_boundaries():
         inclusive="neither",
     )
 
-    series, original_issue_count, issue_count, valid, amended = validator.evaluate(col)
+    series, validation = validator.evaluate(col)
     assert col.equals(series)
-    assert original_issue_count
-    assert issue_count
-    assert valid is False
-    assert amended is False
+    assert validation.original_issues
+    assert validation.pending_issues
+    assert validation.valid is False
+    assert validation.amended is False
 
 
 def test_range_validator_lt():
@@ -88,10 +87,10 @@ def test_range_validator_lt():
         inclusive="neither",
     )
 
-    series, original_issue_count, _, valid, _ = validator.evaluate(col)
+    series, validation = validator.evaluate(col)
     assert col.equals(series)
-    assert original_issue_count == 1
-    assert valid is False
+    assert validation.original_issues == 1
+    assert validation.valid is False
 
 
 def test_range_validator_le():
@@ -106,9 +105,9 @@ def test_range_validator_le():
         inclusive="right",
     )
 
-    _, original_issue_count, _, valid, _ = validator.evaluate(col)
-    assert not original_issue_count
-    assert valid
+    _, validation = validator.evaluate(col)
+    assert not validation.original_issues
+    assert validation.valid
 
 
 def test_range_validator_gt():
@@ -123,9 +122,9 @@ def test_range_validator_gt():
         inclusive="left",
     )
 
-    _, original_issue_count, _, valid, _ = validator.evaluate(col)
-    assert not original_issue_count
-    assert valid
+    _, validation = validator.evaluate(col)
+    assert not validation.original_issues
+    assert validation.valid
 
 
 def test_range_validator_ge():
@@ -140,6 +139,6 @@ def test_range_validator_ge():
         inclusive="left",
     )
 
-    _, original_issue_count, _, valid, _ = validator.evaluate(col)
-    assert not original_issue_count
-    assert valid
+    _, validation = validator.evaluate(col)
+    assert not validation.original_issues
+    assert validation.valid
