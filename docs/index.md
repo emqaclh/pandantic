@@ -1,6 +1,7 @@
 # Overview
+
 <p align="center">
-    <img src="https://raw.githubusercontent.com/emqaclh/pandantic/main/docs/img/header_image.svg" width="348px">
+    <img src="./img/header_image.svg" width="348px">
 </p>
 <blockquote align="right">
   <q>To be an insufferable twit by arguing by definition</q>
