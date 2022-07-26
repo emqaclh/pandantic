@@ -1,5 +1,16 @@
 # Overview
 
+<p align="center">
+    <img src="./img/header_image.svg" width="348px">
+</p>
+<blockquote align="right">
+  <q>To be an insufferable twit by arguing by definition</q>
+</blockquote>
+
+<div align="right">
+    &ndash; <a href="https://www.urbandictionary.com/define.php?term=Pandantic" style="text-align: right"> Urban Dictionary</a>
+</div>
+
 [**pandantic**](/) is a complementary tool for [**pandas**](https://pandas.pydata.org/) to write and evaluate in a simple way the assumptions that your data must fulfill. Writing these assumptions is done in a simple way by declaring a data schema.
 
 Each schema contains as many attributes as columns your data must contain and each column contains as many validations as your data must fulfill.

@@ -1,8 +1,22 @@
 site_name: pandantic
+repo_url: https://github.com/emqaclh/pandantic
 nav:
   - Home: index.md
 theme:
-  name: materia
+  name: material
+  logo: img/logo.png
+  favicon: img/favicon.png
+  icon:
+    repo: fontawesome/brands/github-alt
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   highlightjs: true
   hljs_languages:
     - yaml
