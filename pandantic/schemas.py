@@ -2,6 +2,7 @@
 Declares the base schema to evaluate and process pandas DataFrames.
 """
 import abc
+import warnings
 from typing import Dict, List, NamedTuple, Tuple
 
 import pandas as pd
@@ -74,11 +75,11 @@ class DataFrameModel(abc.ABC):
                 warning_columns.append(column_name)
 
         if missing_columns or remaining_columns or warning_columns:
-            raise SchemaEvaluationWarning(
-                f"There is {len(missing_columns)} missing columns, {len(remaining_columns)} remaining columns and {len(warning_columns)} invalid non-mandatory evaluated columns.",
-                missing_columns=missing_columns,
-                remaining_columns=remaining_columns,
-                warning_columns=warning_columns,
+            warnings.warn(
+                f"""There is {len(missing_columns)} ({missing_columns}) missing columns,
+                {len(remaining_columns)} ({remaining_columns}) remaining columns
+                and {len(warning_columns)} ({warning_columns}) invalid non-mandatory evaluated columns.""",
+                SchemaEvaluationWarning,
             )
 
         return dataframe, evaluation
@@ -100,24 +101,7 @@ class DataFrameModel(abc.ABC):
 
 
 class SchemaEvaluationWarning(UserWarning):
-    missing_columns: List
-    remaining_columns: List
-    warning_columns: List
-
-    def __init__(
-        self,
-        *args: object,
-        missing_columns: List,
-        remaining_columns: List,
-        warning_columns: List,
-    ) -> None:
-        super().__init__(*args)
-        if missing_columns is not None:
-            self.missing_columns = missing_columns
-        if remaining_columns is not None:
-            self.remaining_columns = remaining_columns
-        if warning_columns is not None:
-            self.remaining_columns = warning_columns
+    pass
 
 
 class SchemaEvaluationException(Exception):
