@@ -50,11 +50,23 @@ class DataFrameModel(abc.ABC):
         dataframe, pre_root_validation = pre_root_validators.validate(dataframe)
         evaluation_data["pre_root_evaluation"] = pre_root_validation
 
+        pre_validations_status = [
+            validation.valid
+            for validation in pre_root_validation
+            if validation.mandatory
+        ]
+        pre_valid = all(pre_validations_status)
+
         for column_name, column_declaration in declared_columns.items():
             if column_name not in missing_columns:
-                column = dataframe.loc[:, column_name]
-                result_column, column_evaluation = column_declaration.evaluate(column)
-                dataframe.loc[:, column_name] = result_column
+                if pre_valid:
+                    column = dataframe.loc[:, column_name]
+                    result_column, column_evaluation = column_declaration.evaluate(
+                        column
+                    )
+                    dataframe.loc[:, column_name] = result_column
+                else:
+                    column_evaluation = evaluations.SuspendedColumnEvaluation()
             else:
                 column_evaluation = evaluations.MissingColumn()
             evaluation_data[column_name] = column_evaluation

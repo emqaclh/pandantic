@@ -37,6 +37,10 @@ class ColumnEvaluation:
         )
 
 
+class SuspendedColumnEvaluation(ColumnEvaluation):
+    pass
+
+
 class MissingColumn(ColumnEvaluation):
     pass
 
