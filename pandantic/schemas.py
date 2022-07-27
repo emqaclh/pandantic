@@ -8,7 +8,7 @@ from typing import Dict, List, NamedTuple, Tuple
 import pandas as pd
 from collections import namedtuple
 
-from pandantic import columns, evaluations
+from pandantic import columns, evaluations, root_validator
 
 
 class DataFrameModel(abc.ABC):
@@ -36,11 +36,20 @@ class DataFrameModel(abc.ABC):
         declared_columns = self.get_columns()
         missing_columns, remaining_columns = self.check_columns(dataframe)
 
+        pre_root_validators, post_root_validators = self.get_model_root_validators()
+
         dataframe_evaluation = namedtuple(
-            name, list(declared_columns.keys()) + remaining_columns
+            name,
+            ["pre_root_evaluation", "post_root_validation"]
+            + list(declared_columns.keys())
+            + remaining_columns,
         )
 
         evaluation_data = dict()
+
+        dataframe, pre_root_validation = pre_root_validators.validate(dataframe)
+        evaluation_data["pre_root_evaluation"] = pre_root_validation
+
         for column_name, column_declaration in declared_columns.items():
             if column_name not in missing_columns:
                 column = dataframe.loc[:, column_name]
@@ -52,6 +61,9 @@ class DataFrameModel(abc.ABC):
 
         for column_name in remaining_columns:
             evaluation_data[column_name] = evaluations.UnhandledColumn()
+
+        dataframe, post_root_validation = post_root_validators.validate(dataframe)
+        evaluation_data["post_root_validation"] = post_root_validation
 
         dataframe.columns = original_column_names
 
@@ -100,20 +112,42 @@ class DataFrameModel(abc.ABC):
         return self.columns
 
     @classmethod
-    def get_model_root_validators(cls):
+    def get_model_root_validators(
+        cls,
+    ) -> Tuple[root_validator.RootValidatorSet, root_validator.RootValidatorSet]:
         class_attributes = cls.__dict__.items()
-        root_validators = dict()
+        pre_root_validators = root_validator.RootValidatorSet()
+        post_root_validators = root_validator.RootValidatorSet()
         for name, value in class_attributes:
             if isinstance(value, classmethod):
                 _callable = getattr(value, "__func__")
                 is_root_validator = getattr(_callable, "root_validation", False)
                 if is_root_validator:
-                    root_validators[name] = {
-                        "callable": _callable,
-                        "pre": getattr(_callable, "pre", None),
-                        "amendment": getattr(_callable, "amendment", None),
-                    }
-        return root_validators
+
+                    main_func = _callable
+                    pre = getattr(_callable, "pre", None)
+                    description = getattr(_callable, "description", None)
+                    if description is None:
+                        description = name
+
+                    mandatory = getattr(_callable, "mandatory", True)
+
+                    validator = root_validator.RootValidator(
+                        main_func=main_func,
+                        mandatory=mandatory,
+                        description=description,
+                    )
+
+                    amendment = getattr(_callable, "amendment", None)
+                    if amendment is not None:
+                        validator.set_amendment(amendment=amendment)
+
+                    if pre:
+                        pre_root_validators.add_validator(validator=validator)
+                    else:
+                        post_root_validators.add_validator(validator=validator)
+
+        return pre_root_validators, post_root_validators
 
 
 class SchemaEvaluationWarning(UserWarning):

@@ -58,3 +58,7 @@ class ValidationSet:
             raise ValueError(f"Validation expected, got {type(validation)} instead.")
 
         self.validations.append(validation)
+
+
+class RootValidationSet(ValidationSet):
+    pass
