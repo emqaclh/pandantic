@@ -99,6 +99,22 @@ class DataFrameModel(abc.ABC):
     def get_columns(self) -> Dict[str, columns.Column]:
         return self.columns
 
+    @classmethod
+    def get_model_root_validators(cls):
+        class_attributes = cls.__dict__.items()
+        root_validators = dict()
+        for name, value in class_attributes:
+            if isinstance(value, classmethod):
+                _callable = getattr(value, "__func__")
+                is_root_validator = getattr(_callable, "root_validation", False)
+                if is_root_validator:
+                    root_validators[name] = {
+                        "callable": _callable,
+                        "pre": getattr(_callable, "pre", None),
+                        "amendment": getattr(_callable, "amendment", None),
+                    }
+        return root_validators
+
 
 class SchemaEvaluationWarning(UserWarning):
     pass

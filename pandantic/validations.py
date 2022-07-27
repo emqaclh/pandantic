@@ -27,12 +27,20 @@ class SuspendedValidation(Validation):
         self.additional_info = "Validation was suspended"
 
 
+class RootValidation(Validation):
+    pass
+
+
 class ValidationError(Validation, Exception):
     def __init__(
         self, description: str, mandatory: bool, original_error: Exception
     ) -> None:
         super().__init__(description, mandatory)
         self.original_error = original_error
+
+
+class RootValidationError(ValidationError):
+    pass
 
 
 class ValidationSet:
