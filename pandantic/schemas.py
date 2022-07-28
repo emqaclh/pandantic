@@ -5,8 +5,8 @@ import abc
 import warnings
 from typing import Dict, List, NamedTuple, Tuple
 
-import pandas as pd
 from collections import namedtuple
+import pandas as pd
 
 from pandantic import columns, evaluations, root_validator
 
@@ -50,12 +50,7 @@ class DataFrameModel(abc.ABC):
         dataframe, pre_root_validation = pre_root_validators.validate(dataframe)
         evaluation_data["pre_root_evaluation"] = pre_root_validation
 
-        pre_validations_status = [
-            validation.valid
-            for validation in pre_root_validation
-            if validation.mandatory
-        ]
-        pre_valid = all(pre_validations_status)
+        pre_valid = pre_root_validation.valid
 
         for column_name, column_declaration in declared_columns.items():
             if column_name not in missing_columns:

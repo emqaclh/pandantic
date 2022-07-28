@@ -47,11 +47,11 @@ class RootValidator(validators.Validator):
 
             validation = validations.RootValidation(self.description, self.mandatory)
 
-            valid = self.main_func(dataframe)
+            valid = self.main_func(self, dataframe)
 
             if not valid and self.amendment is not None:
                 dataframe = self.amendment(dataframe)
-                valid = self.main_func(dataframe)
+                valid = self.main_func(self, dataframe)
                 validation.amended = True
 
             validation.valid = True

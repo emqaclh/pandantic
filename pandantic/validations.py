@@ -59,6 +59,26 @@ class ValidationSet:
 
         self.validations.append(validation)
 
+    @property
+    def valid(self):
+        return all(
+            [
+                validation.valid
+                for validation in self.validations
+                if validation.mandatory
+            ]
+        )
+
+    @property
+    def warnings(self):
+        return all(
+            [
+                validation.valid
+                for validation in self.validations
+                if not validation.mandatory
+            ]
+        )
+
 
 class RootValidationSet(ValidationSet):
     pass
