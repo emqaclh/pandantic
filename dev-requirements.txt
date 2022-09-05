@@ -7,7 +7,7 @@ colorama==0.4.5; sys_platform == "win32" and python_version >= "3.7" and python_
 coverage==6.4.2; python_version >= "3.7"
 distlib==0.3.4; python_version >= "3.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version >= "3.7"
 filelock==3.7.1; python_version >= "3.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version >= "3.7"
-identify==2.5.2; python_version >= "3.7"
+identify==2.5.4; python_version >= "3.7"
 iniconfig==1.1.1; python_version >= "3.7"
 mypy-extensions==0.4.3; python_full_version >= "3.6.2"
 nodeenv==1.7.0; python_version >= "3.7" and python_full_version < "3.0.0" or python_full_version >= "3.7.0" and python_version >= "3.7"
