@@ -22,7 +22,7 @@ class DataFrameModel(abc.ABC):
         self.columns = column_attributes
 
     def evaluate(
-        self, dataframe: pd.DataFrame, name: str
+        self, dataframe: pd.DataFrame, name: str, warn: bool = True
     ) -> Tuple[pd.DataFrame, NamedTuple]:
         if not name or name is None:
             raise ValueError("name should be correctly declared.")
@@ -73,7 +73,7 @@ class DataFrameModel(abc.ABC):
             if column_eval.warnings and column_eval.warnings is not None:
                 warning_columns.append(column_name)
 
-        if missing_columns or remaining_columns or warning_columns:
+        if warn and (missing_columns or remaining_columns or warning_columns):
             raise SchemaEvaluationWarning(
                 f"There is {len(missing_columns)} missing columns, {len(remaining_columns)} remaining columns and {len(warning_columns)} invalid non-mandatory evaluated columns.",
                 missing_columns=missing_columns,
