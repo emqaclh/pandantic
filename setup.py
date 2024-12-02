@@ -11,8 +11,8 @@ setup(
     packages=["pandantic"],
     zip_safe=False,
     install_requires=[
-        "numpy==1.23.1",
-        "pandas==1.4.3",
+        "numpy==2.1.3",
+        "pandas==2.2.3",
         "python-dateutil==2.8.2",
         "pytz==2022.1",
         "six==1.16.0",
