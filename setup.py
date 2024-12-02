@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="pandantic",
-    version="0.7.0",
+    version="0.7.1",
     description="validation and amendment on pandas DataFrames",
     url="https://github.com/emqaclh/pandantic",
     author="emqaclh",
